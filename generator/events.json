@@ -1,0 +1,90 @@
+{
+    "on": [
+        {
+            "name": "on_success_update_balance",
+            "event": "successupdateBalance",
+            "type": "models.SuccessUpdateBalance"
+        },
+        {
+            "name": "on_update_history_new_fast",
+            "event": "updateHistoryNewFast",
+            "type": "models.UpdateHistoryFastEvent"
+        },
+        {
+            "name": "on_update_stream",
+            "event": "updateStream",
+            "type": "list[models.UpdateStreamItem]",
+            "custom_handler_type": "models.UpdateStreamItem",
+            "custom_handler": "on_update_stream.template"
+        },
+        {
+            "name": "on_update_opened_deals",
+            "event": "updateOpenedDeals",
+            "type": "list[models.Deal]"
+        },
+        {
+            "name": "on_update_closed_deals",
+            "event": "updateClosedDeals",
+            "type": "list[models.Deal]"
+        }
+    ],
+    "emit": [
+        {
+            "name": "emit_ps",
+            "event": "ps"
+        },
+        {
+            "name": "emit_indicator_load",
+            "event": "indicator/load"
+        },
+        {
+            "name": "emit_favorite_load",
+            "event": "favorite/load"
+        },
+        {
+            "name": "emit_price_alert_load",
+            "event": "price-alert/load"
+        },
+        {
+            "name": "emit_subscribe_symbol",
+            "event": "subscribeSymbol",
+            "args": [
+                {
+                    "name": "asset",
+                    "type": "str"
+                }
+            ]
+        },
+        {
+            "name": "emit_subscribe_for",
+            "event": "subfor",
+            "args": [
+                {
+                    "name": "asset",
+                    "type": "str"
+                }
+            ]
+        },
+        {
+            "name": "emit_unsubscribe_for",
+            "event": "unsubfor",
+            "args": [
+                {
+                    "name": "asset",
+                    "type": "str"
+                }
+            ]
+        },
+        {
+            "name": "emit_open_order",
+            "event": "openOrder",
+            "args": [
+                {
+                    "name": "data",
+                    "type": "models.OpenOrderRequest",
+                    "cast": true
+                }
+            ]
+        }
+    ]
+}

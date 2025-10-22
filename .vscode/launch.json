@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "Main",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "main.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Generator",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "generator/generate.py",
+            "console": "integratedTerminal"
+        }
+    ]
+}

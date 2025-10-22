@@ -1,0 +1,33 @@
+
+def _process(data: list[tuple[str, float, float]]) -> "list[%(type)s]":
+    return [
+        typing.cast(
+            "%(type)s",
+            {
+                "asset": typing.cast("str", it[0]),
+                "timestamp": typing.cast("float", it[1]) - 7200, # TO UTC
+                "value": typing.cast("float", it[2]),
+            }
+        ) for it in data
+    ]
+
+if handler is not None:
+    async def wrapper(data: list[tuple[str, float, float]]):
+        result = handler(_process(data))
+        if asyncio.iscoroutine(result):
+            return await result
+        return result
+
+    self.sio.on("%(event)s", handler=wrapper)
+else:
+
+    def set_handler(_handler: "TypedEventListener[list[%(type)s]]"):
+        async def wrapper(data: list[tuple[str, float, float]]):
+            result = _handler(_process(data))
+            if asyncio.iscoroutine(result):
+                return await result
+            return result
+
+        self.sio.on("%(event)s", handler=wrapper)
+
+    return set_handler

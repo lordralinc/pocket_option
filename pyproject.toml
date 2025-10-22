@@ -2,16 +2,99 @@
 name = "pocket-option"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Yury \"lordralinc\" Yushmanov"}
-]
-license = {text = "MIT"}
+authors = [{ name = "Yury \"lordralinc\" Yushmanov" }]
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "python-socketio[asyncio-client] (>=5.14.2,<6.0.0)",
+    "aiohttp[speedups] (>=3.13.1,<4.0.0)",
 ]
+
+
+[project.optional-dependencies]
+ujson = ["ujson (>=5.11.0,<6.0.0)"]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.14.1,<0.15.0)",
+    "pre-commit (>=4.3.0,<5.0.0)",
+    "isort (>=7.0.0,<8.0.0)",
+    "black (>=25.9.0,<26.0.0)",
+    "rich (>=14.2.0,<15.0.0)",
+]
+
+
+[tool.black]
+line-length = 120
+target-version = ["py313"]
+[tool.ruff]
+line-length = 120
+respect-gitignore = true
+target-version = "py313"
+lint.select = [
+    "UP",
+    "I",
+    "E",
+    "W",
+    "F",
+    "B",
+    "C4",
+    "S",
+    "BLE",
+    "T20",
+    "T10",
+    "PT",
+    "RUF",
+    "DTZ",
+    "ERA",
+    "FURB",
+    "ALL",
+]
+lint.ignore = [
+    "ICN001",
+    "ANN201",
+    "ANN202",
+    "ANN204",
+    "C408",
+    "D",
+    "ANN401",
+    "DTZ005",
+    "DTZ006",
+    "EM101",
+    "EM102",
+    "FBT",
+    "G004",
+    "RET503",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "S110",
+    "TRY003",
+    "TRY301",
+    "C901",
+    "PLR0912",
+    "PLR0913",
+    "PGH003",
+]
+lint.fixable = ["I", "RUF022", "UP035"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = [
+    "classmethod",
+    "pydantic.field_validator",
+    "pydantic.model_validator",
+]
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing_extensions", "typing"]
