@@ -1,0 +1,43 @@
+import typing
+
+from pocket_option import models
+from pocket_option.client import BasePocketOptionClient
+
+if typing.TYPE_CHECKING:
+    from pocket_option.types import TypedEventListener
+
+__all__ = ("PocketOptionClient",)
+
+
+
+class PocketOptionClientEmit:
+
+    def __init__(self, client: BasePocketOptionClient) -> None:
+        self.client = client
+    
+{% for emit in data.emit %}
+{% include 'emit.jinja2' %}
+{% endfor %}
+
+class PocketOptionClientOn:
+
+    def __init__(self, client: BasePocketOptionClient) -> None:
+        self.client = client
+
+{% for on_method in data.on %}
+{% include 'on_method.jinja2' %}
+{% endfor %}
+
+
+class PocketOptionClient(BasePocketOptionClient):
+
+    @property
+    def on(self) -> PocketOptionClientOn:
+        return PocketOptionClientOn(self)
+
+    @property
+    def emit(self) -> PocketOptionClientEmit:
+        return PocketOptionClientEmit(self)
+
+
+

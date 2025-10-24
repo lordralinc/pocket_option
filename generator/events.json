@@ -1,90 +1,135 @@
 {
     "on": [
         {
-            "name": "on_success_update_balance",
+            "name": "success_update_balance",
             "event": "successupdateBalance",
-            "type": "models.SuccessUpdateBalance"
+            "return_type": "models.SuccessUpdateBalance",
+            "pydantic_model": "models.SuccessUpdateBalance",
+            "doc": "Triggered when the user's account balance is updated."
         },
         {
-            "name": "on_update_history_new_fast",
+            "name": "update_history_new_fast",
             "event": "updateHistoryNewFast",
-            "type": "models.UpdateHistoryFastEvent"
+            "return_type": "models.UpdateHistoryFastEvent",
+            "pydantic_model": "models.UpdateHistoryFastEvent",
+            "doc": "Triggered when a new fast trading history record is received."
         },
         {
-            "name": "on_update_stream",
+            "name": "update_stream",
             "event": "updateStream",
-            "type": "list[models.UpdateStreamItem]",
-            "custom_handler_type": "models.UpdateStreamItem",
-            "custom_handler": "on_update_stream.template"
+            "return_type": "list[models.UpdateStreamItem]",
+            "pydantic_model": "models.UpdateStreamTypeAdapter",
+            "doc": "Triggered when a live data stream update is received."
         },
         {
-            "name": "on_update_opened_deals",
+            "name": "update_opened_deals",
             "event": "updateOpenedDeals",
-            "type": "list[models.Deal]"
+            "return_type": "list[models.Deal]",
+            "pydantic_model": "models.DealListTypeAdapter",
+            "doc": "Triggered when the list of currently opened deals is updated."
         },
         {
-            "name": "on_update_closed_deals",
+            "name": "success_open_order",
+            "event": "successopenOrder",
+            "return_type": "models.Deal",
+            "pydantic_model": "models.Deal"
+        },
+        {
+            "name": "update_closed_deals",
             "event": "updateClosedDeals",
-            "type": "list[models.Deal]"
+            "return_type": "list[models.Deal]",
+            "pydantic_model": "models.DealListTypeAdapter",
+            "doc": "Triggered when the list of recently closed deals is updated."
+        },
+        {
+            "name": "success_close_order",
+            "event": "successcloseOrder",
+            "return_type": "models.SuccessCloseOrder",
+            "pydantic_model": "models.SuccessCloseOrder"
         }
     ],
     "emit": [
         {
-            "name": "emit_ps",
+            "name": "ps",
             "event": "ps"
         },
         {
-            "name": "emit_indicator_load",
+            "name": "indicator_load",
             "event": "indicator/load"
         },
         {
-            "name": "emit_favorite_load",
+            "name": "favorite_load",
             "event": "favorite/load"
         },
         {
-            "name": "emit_price_alert_load",
+            "name": "price_alert_load",
             "event": "price-alert/load"
         },
         {
-            "name": "emit_subscribe_symbol",
+            "name": "auth",
+            "event": "auth",
+            "args": {
+                "name": "data",
+                "type": "models.AuthorizationData"
+            }
+        },
+        {
+            "name": "subscribe_symbol",
             "event": "subscribeSymbol",
-            "args": [
-                {
-                    "name": "asset",
-                    "type": "str"
-                }
-            ]
+            "args": {
+                "name": "asset",
+                "type": "models.Asset",
+                "doc": "The asset symbol to subscribe to."
+            },
+            "doc": "Subscribes to live updates for a specific asset symbol."
         },
         {
-            "name": "emit_subscribe_for",
+            "name": "subscribe_for",
             "event": "subfor",
-            "args": [
-                {
-                    "name": "asset",
-                    "type": "str"
-                }
-            ]
+            "args": {
+                "name": "asset",
+                "type": "models.Asset",
+                "doc": "The asset symbol to subscribe for."
+            },
+            "doc": "Subscribes to specific data streams for the given asset."
         },
         {
-            "name": "emit_unsubscribe_for",
+            "name": "unsubscribe_for",
             "event": "unsubfor",
-            "args": [
-                {
-                    "name": "asset",
-                    "type": "str"
-                }
-            ]
+            "args": {
+                "name": "asset",
+                "type": "models.Asset",
+                "doc": "The asset symbol to unsubscribe from."
+            },
+            "doc": "Unsubscribes from data streams for the given asset."
         },
         {
-            "name": "emit_open_order",
+            "name": "change_symbol",
+            "event": "changeSymbol",
+            "args": {
+                "name": "data",
+                "type": "models.ChangeSymbolRequest"
+            }
+        },
+        {
+            "name": "open_order",
             "event": "openOrder",
-            "args": [
-                {
-                    "name": "data",
-                    "type": "models.OpenOrderRequest",
-                    "cast": true
-                }
-            ]
+            "args": {
+                "name": "data",
+                "type": "models.OpenOrderRequest",
+                "doc": "Order request payload."
+            },
+            "doc": "Sends a request to open a new trading order."
+        },
+        {
+            "name": "copy_signal_order",
+            "event": "copySignalOrder",
+            "args": {
+                "name": "data",
+                "type": "models.CopySignalRequest",
+                "doc": "Copy trading signal request payload."
+            },
+            "doc": "Executes an order based on a copied trading signal."
         }
     ]
 }

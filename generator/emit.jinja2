@@ -1,0 +1,10 @@
+    async def {{ emit.name }}(
+        self{%if emit.args %}, 
+        {{ emit.args.name }}: {{ emit.args.type }}{% if emit.args.default %}{{ emit.args.default }}{% endif %}{% endif %}
+    ) -> None:
+        """{{emit.doc or 'No description'}}
+
+        {%if emit.args and emit.args.doc %} :param {{emit.args.name}}: {{ emit.args.doc }}{% endif %}
+        {%if emit.args %} :type {{emit.args.name}}: {{ emit.args.type }}{% endif %}
+        """
+        await self.client.send("{{emit.event}}"{% if emit.args %}, {{ emit.args.name }}{% endif %})

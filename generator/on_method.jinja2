@@ -1,0 +1,23 @@
+
+    @typing.overload
+    def {{on_method.name}}(
+        self,
+        handler: None = None,
+    ) -> "typing.Callable[[TypedEventListener[{{ on_method.return_type }}]], None]": ...
+
+    @typing.overload
+    def {{on_method.name}}(
+        self,
+        handler: "TypedEventListener[{{ on_method.return_type }}]",
+    ) -> None: ...
+
+    def {{on_method.name}}(
+        self,
+        handler: "TypedEventListener[{{ on_method.return_type }}] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[{{ on_method.return_type }}]], None]":
+        """{{on_method.doc or 'No description'}}
+        
+        :param handler: Callback
+        :type handler: TypedEventListener[{{ on_method.return_type }}] | None
+        """
+        return self.client.add_on("{{on_method.event}}", handler=handler{%if on_method.pydantic_model %}, model={{on_method.pydantic_model}}{% endif %})

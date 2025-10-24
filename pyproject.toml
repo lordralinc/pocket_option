@@ -9,16 +9,14 @@ requires-python = ">=3.13"
 dependencies = [
     "python-socketio[asyncio-client] (>=5.14.2,<6.0.0)",
     "aiohttp[speedups] (>=3.13.1,<4.0.0)",
+    "pydantic (>=2.12.3,<3.0.0)",
+    "pytz (>=2025.2,<2026.0)",
 ]
 
 
 [project.optional-dependencies]
 ujson = ["ujson (>=5.11.0,<6.0.0)"]
 
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
@@ -27,12 +25,19 @@ dev = [
     "isort (>=7.0.0,<8.0.0)",
     "black (>=25.9.0,<26.0.0)",
     "rich (>=14.2.0,<15.0.0)",
+    "jinja2 (>=3.1.6,<4.0.0)",
 ]
 
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 120
 target-version = ["py313"]
+
+
 [tool.ruff]
 line-length = 120
 respect-gitignore = true
@@ -84,6 +89,7 @@ lint.ignore = [
 ]
 lint.fixable = ["I", "RUF022", "UP035"]
 
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
@@ -95,6 +101,7 @@ classmethod-decorators = [
     "pydantic.field_validator",
     "pydantic.model_validator",
 ]
+
 
 [tool.ruff.lint.flake8-type-checking]
 exempt-modules = ["typing_extensions", "typing"]
