@@ -17,6 +17,7 @@ __all__ = (
     "OpenPendingOrderRequest",
     "OpenPendingOrderRequestOpenType",
     "OrderAction",
+    "SuccessAuthData",
     "SuccessUpdateBalance",
     "UpdateHistoryFastEvent",
     "UpdateStreamItem",
@@ -196,6 +197,10 @@ class Asset(str, enum.Enum):
         from pydantic_core import core_schema  # noqa: F811, PLC0415, RUF100
 
         return core_schema.no_info_after_validator_function(cls, core_schema.str_schema())
+
+
+class SuccessAuthData(pydantic.BaseModel):
+    id: str
 
 
 class AuthorizationData(pydantic.BaseModel):

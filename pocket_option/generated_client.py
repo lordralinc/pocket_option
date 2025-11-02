@@ -251,6 +251,75 @@ class PocketOptionClientOn:
         """
         return self.client.add_on("successcloseOrder", handler=handler, model=models.SuccessCloseOrder)
 
+    @typing.overload
+    def connect(
+        self,
+        handler: None = None,
+    ) -> "typing.Callable[[TypedEventListener[None]], None]": ...
+
+    @typing.overload
+    def connect(
+        self,
+        handler: "TypedEventListener[None]",
+    ) -> None: ...
+
+    def connect(
+        self,
+        handler: "TypedEventListener[None] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[None]], None]":
+        """No description
+
+        :param handler: Callback
+        :type handler: TypedEventListener[None] | None
+        """
+        return self.client.add_on("connect", handler=handler, model=None)
+
+    @typing.overload
+    def disconnect(
+        self,
+        handler: None = None,
+    ) -> "typing.Callable[[TypedEventListener[None]], None]": ...
+
+    @typing.overload
+    def disconnect(
+        self,
+        handler: "TypedEventListener[None]",
+    ) -> None: ...
+
+    def disconnect(
+        self,
+        handler: "TypedEventListener[None] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[None]], None]":
+        """No description
+
+        :param handler: Callback
+        :type handler: TypedEventListener[None] | None
+        """
+        return self.client.add_on("disconnect", handler=handler, model=None)
+
+    @typing.overload
+    def success_auth(
+        self,
+        handler: None = None,
+    ) -> "typing.Callable[[TypedEventListener[models.SuccessAuthData]], None]": ...
+
+    @typing.overload
+    def success_auth(
+        self,
+        handler: "TypedEventListener[models.SuccessAuthData]",
+    ) -> None: ...
+
+    def success_auth(
+        self,
+        handler: "TypedEventListener[models.SuccessAuthData] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[models.SuccessAuthData]], None]":
+        """No description
+
+        :param handler: Callback
+        :type handler: TypedEventListener[models.SuccessAuthData] | None
+        """
+        return self.client.add_on("successauth", handler=handler, model=models.SuccessAuthData)
+
 
 class PocketOptionClient(BasePocketOptionClient):
     @property

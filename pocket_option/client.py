@@ -1,5 +1,6 @@
 import asyncio
 import collections.abc
+import functools
 import logging
 import typing
 from inspect import isclass
@@ -11,21 +12,28 @@ import socketio
 from pocket_option.constants import DEFAULT_ORIGIN, DEFAULT_USER_AGENT
 from pocket_option.middleware import Middleware
 from pocket_option.middlewares import FixTypesOnMiddleware, MakeJsonOnMiddleware
-from pocket_option.utils import get_json_function
+from pocket_option.types import JsonValue
+from pocket_option.utils import get_function_full_name, get_json_function
 
 if typing.TYPE_CHECKING:
     from pocket_option import models
-    from pocket_option.types import EmitCallback, JsonFunction, JsonValue, SIOEventListener
+    from pocket_option.types import EmitCallback, JsonFunction, SIOEventListener
 
 __all__ = ("BasePocketOptionClient",)
 
 logger = logging.getLogger()
 
 
+class _Handler[T](typing.TypedDict):
+    name: str
+    model: type[pydantic.BaseModel] | pydantic.TypeAdapter | None
+    callback: T
+
+
 class BasePocketOptionClient:
     def __init__(
         self,
-        on_middlewares: "list[Middleware] | None" = None,
+        middlewares: "list[Middleware] | None" = None,
         *,
         reconnection: bool = True,
         reconnection_attempts: int = 0,
@@ -113,7 +121,7 @@ class BasePocketOptionClient:
             Whether to append a timestamp to each request for caching avoidance.
             Defaults to `False`.
         """
-        self.middlewares = on_middlewares or [MakeJsonOnMiddleware(), FixTypesOnMiddleware()]
+        self.middlewares = middlewares or [MakeJsonOnMiddleware(), FixTypesOnMiddleware()]
         self.json = json or get_json_function()
         self.sio = socketio.AsyncClient(
             reconnection=reconnection,
@@ -132,6 +140,17 @@ class BasePocketOptionClient:
             timestamp_requests=timestamp_requests,
             engineio_logger=engineio_logger,
         )
+        self.handlers: list[
+            _Handler[
+                typing.Callable[
+                    ...,
+                    typing.Awaitable[JsonValue | pydantic.BaseModel | list[pydantic.BaseModel] | None],
+                ]
+            ]
+        ] = []
+        self.sio.on("connect", handler=self.handle_connect_event)
+        self.sio.on("disconnect", handler=self.handle_disconnect_event)
+        self.sio.on("*", handler=self.handle_new_event)
 
     def get_auth_from_packet(self, packet: str) -> "models.AuthorizationData":
         packet = packet.removeprefix("42")
@@ -191,6 +210,43 @@ class BasePocketOptionClient:
             retry=retry,
         )
 
+    async def handle_new_event(
+        self,
+        event_name: str,
+        data: "bytes | None" = None,
+    ) -> "JsonValue | None":
+        return await self._handle_event(event_name, data)
+
+    async def handle_connect_event(self) -> None:
+        await self._handle_event("connect")
+
+    async def handle_disconnect_event(self) -> None:
+        await self._handle_event("connect")
+
+    async def _handle_event(self, event_name: str, data: bytes | None = None) -> "JsonValue | None":
+        results = []
+        logger.debug("New event '%s' with data %r", event_name, data)
+        for handler in filter(lambda x: x["name"] == event_name, self.handlers):
+            try:
+                result = await handler["callback"](data)
+                results.append(result)
+            except Exception:
+                logger.exception(
+                    "Error on handler %s, %s",
+                    handler["name"],
+                    get_function_full_name(handler["callback"]),
+                )
+            else:
+                logger.debug(
+                    "Handled by '%s' with result %r",
+                    get_function_full_name(handler["callback"]),
+                    result,
+                )
+
+        for result in results:
+            if result is not None:
+                return result
+
     @typing.overload
     def add_on(
         self,
@@ -215,39 +271,42 @@ class BasePocketOptionClient:
         *,
         model: type[pydantic.BaseModel] | pydantic.TypeAdapter | None = None,
     ) -> "None | typing.Callable[[SIOEventListener], None]":
-        def _get_data(d: "JsonValue | None"):
+        def _get_data(d: "JsonValue | bytes | None"):
+            if isinstance(d, bytes):
+                d = self.json.loads(d)
             if d and isinstance(d, dict) and model and isclass(model) and issubclass(model, pydantic.BaseModel):
                 return model.model_validate(d)
             if d and isinstance(model, pydantic.TypeAdapter):
                 return model.validate_python(d)
             return d
 
-        if handler is None:
+        def _get_result(result: typing.Any):
+            if isinstance(result, pydantic.BaseModel):
+                return result.model_dump(mode="json")
+            if isinstance(result, list):
+                return [_get_result(it) for it in result]
+            if isinstance(result, dict):
+                return {k: _get_result(it) for k, it in result.items()}
+            return result
 
-            def set_handler(_handler: "SIOEventListener"):
-                async def wrapper(data: "JsonValue | None"):
-                    for middleware in self.middlewares:
-                        data = await middleware.on(event, data)
-                    new_data = _get_data(data)
-                    logger.debug("New event '%s' with data %r", event, new_data)
-                    result = _handler(new_data)
-                    if asyncio.iscoroutine(result):
-                        await result
+        def set_handler(_handler: "SIOEventListener"):
+            @functools.wraps(_handler)
+            async def wrapper(data: JsonValue | bytes | None):
+                if isinstance(data, bytes):
+                    data = self.json.loads(data)
+                for middleware in self.middlewares:
+                    data = await middleware.on(event, data)
+                new_data = _get_data(data)
+                result = _handler(new_data)
+                if asyncio.iscoroutine(result):
+                    result = await result
+                return _get_result(result)
 
-                self.sio.on(event, handler=wrapper)
+            self.handlers.append({"name": event, "callback": wrapper, "model": model})  # type: ignore
 
-            return set_handler
-
-        async def _handler(data: "JsonValue | None"):
-            for middleware in self.middlewares:
-                data = await middleware.on(event, data)
-            new_data = _get_data(data)
-            logger.debug("New event '%s' with data %r", event, new_data)
-            result = handler(new_data)
-            if asyncio.iscoroutine(result):
-                await result
-
-        return self.sio.on(event, handler=_handler)
+        if handler:
+            return set_handler(handler)
+        return set_handler
 
     async def send(
         self,

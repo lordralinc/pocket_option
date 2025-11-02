@@ -1,3 +1,5 @@
+import enum
+
 __all__ = (
     "API_LIMITS_MAX_CONCURRENT_ORDERS",
     "API_LIMITS_MAX_DURATION",
@@ -25,7 +27,7 @@ DEFAULT_ORIGIN = "https://m.pocketoption.com"
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0"
 
 
-class Regions:
+class Regions(enum.StrEnum):
     UNITED_STATES_NORTH = "wss://api-us-north.po.market"
     UNITED_STATES_SOUTH = "wss://api-us-south.po.market"
     EUROPA = "wss://api-eu.po.market"

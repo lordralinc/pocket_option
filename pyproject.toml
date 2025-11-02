@@ -1,7 +1,7 @@
 [project]
 name = "pocket-option"
-version = "0.1.0"
-description = ""
+version = "0.1.1"
+description = "Async API client for Pocket Option platform"
 authors = [{ name = "Yury \"lordralinc\" Yushmanov" }]
 license = "MIT"
 readme = "README.md"
@@ -13,6 +13,10 @@ dependencies = [
     "pytz (>=2025.2,<2026.0)",
 ]
 
+[project.urls]
+Homepage = "https://github.com/lordralinc/pocket_option"
+Repository = "https://github.com/lordralinc/pocket_option"
+Issues = "https://github.com/lordralinc/pocket_option/issues"
 
 [project.optional-dependencies]
 ujson = ["ujson (>=5.11.0,<6.0.0)"]

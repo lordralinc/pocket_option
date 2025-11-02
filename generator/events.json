@@ -46,6 +46,24 @@
             "event": "successcloseOrder",
             "return_type": "models.SuccessCloseOrder",
             "pydantic_model": "models.SuccessCloseOrder"
+        },
+        {
+            "name": "connect",
+            "event": "connect",
+            "return_type": "None",
+            "pydantic_model": "None"
+        },
+        {
+            "name": "disconnect",
+            "event": "disconnect",
+            "return_type": "None",
+            "pydantic_model": "None"
+        },
+        {
+            "name": "success_auth",
+            "event": "successauth",
+            "return_type": "models.SuccessAuthData",
+            "pydantic_model": "models.SuccessAuthData"
         }
     ],
     "emit": [

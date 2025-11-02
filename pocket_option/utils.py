@@ -1,4 +1,5 @@
 import contextlib
+import inspect
 import random
 import time
 import typing
@@ -10,6 +11,14 @@ from pocket_option.types import JsonFunction, JsonValue
 __all__ = ("append_or_replace", "fix_timestamp", "generate_request_id", "get_json_function")
 
 rnd = random.SystemRandom()
+
+
+def get_function_full_name(fn: typing.Callable) -> str:
+    if inspect.isclass(fn):
+        return fn.__name__ + ".__init__"
+    if fn.__module__:
+        return f"{fn.__module__}.{fn.__qualname__}"
+    return fn.__qualname__
 
 
 def get_json_function() -> JsonFunction:
