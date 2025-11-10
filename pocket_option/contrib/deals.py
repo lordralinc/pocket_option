@@ -4,15 +4,28 @@ import collections.abc
 import contextlib
 import datetime
 import itertools
+import logging
 import typing
 import uuid
 
+from pocket_option.constants import (
+    API_LIMITS_MAX_CONCURRENT_ORDERS,
+    API_LIMITS_MAX_DURATION,
+    API_LIMITS_MAX_ORDER_AMOUNT,
+    API_LIMITS_MIN_DURATION,
+    API_LIMITS_MIN_ORDER_AMOUNT,
+)
+from pocket_option.errors import DealError
 from pocket_option.generated_client import PocketOptionClient
 from pocket_option.models import Asset, Deal, IsDemo, OpenOrderRequest, OrderAction, SuccessCloseOrder
 from pocket_option.utils import append_or_replace, generate_request_id
 
 if typing.TYPE_CHECKING:
     from pocket_option.generated_client import PocketOptionClient
+
+__all__ = ("DealsStorage", "MemoryDealsStorage")
+
+logger = logging.getLogger("pocket_option.deals")
 
 
 class DealsStorage:
@@ -36,7 +49,60 @@ class DealsStorage:
         is_demo: IsDemo = 1,
         request_id: int | None = None,
         option_type: int = 100,
+        *,
+        check_limits: bool = True,
     ) -> Deal:
+        if check_limits:
+            if amount < API_LIMITS_MIN_ORDER_AMOUNT:
+                raise DealError(
+                    "min_amount",
+                    "Min amount reached",
+                    extras={
+                        "amout": amount,
+                        "limit": API_LIMITS_MIN_ORDER_AMOUNT,
+                    },
+                )
+            if amount > API_LIMITS_MAX_ORDER_AMOUNT:
+                raise DealError(
+                    "max_amount",
+                    "Max amount reached",
+                    extras={
+                        "amout": amount,
+                        "limit": API_LIMITS_MAX_ORDER_AMOUNT,
+                    },
+                )
+            if time < API_LIMITS_MIN_DURATION:
+                raise DealError(
+                    "min_duration",
+                    "Min duration reached",
+                    extras={
+                        "time": time,
+                        "limit": API_LIMITS_MIN_DURATION,
+                    },
+                )
+            if time > API_LIMITS_MAX_DURATION:
+                raise DealError(
+                    "max_duration",
+                    "Max duration reached",
+                    extras={
+                        "time": time,
+                        "limit": API_LIMITS_MAX_DURATION,
+                    },
+                )
+            if not self.client.authorization_data:
+                logger.warning("Failed to check concurent orders: no authorization data")
+            if self.client.authorization_data:
+                orders = await self.get_deals(uid=self.client.authorization_data.uid, closed=False)
+                if len(list(orders)) > API_LIMITS_MAX_CONCURRENT_ORDERS:
+                    raise DealError(
+                        "max_orders",
+                        "Max concurent orders count reached",
+                        extras={
+                            "count": len(list(orders)),
+                            "limit": API_LIMITS_MAX_CONCURRENT_ORDERS,
+                        },
+                    )
+
         request_id = request_id or generate_request_id()
         self._open_deal_events[request_id] = asyncio.Event()
         await self.client.emit.open_order(
@@ -54,11 +120,19 @@ class DealsStorage:
         try:
             await asyncio.wait_for(self._open_deal_events[request_id].wait(), 30)
         except TimeoutError as err:
-            raise TimeoutError(f"Timeout waiting for deal {request_id}") from err
+            raise DealError(
+                "timeout",
+                "Timeout waiting for deal",
+                extras={"request_id": request_id},
+            ) from err
 
         if deal := await self.get_deal(request_id=request_id):
             return deal
-        raise RuntimeError(f"Failed to find deal {request_id}")
+        raise DealError(
+            "not_found",
+            "Failed to find deal",
+            extras={"request_id": request_id},
+        )
 
     @typing.overload
     async def check_deal_result(
@@ -153,6 +227,7 @@ class DealsStorage:
         self,
         *,
         asset: Asset | None = None,
+        uid: int | None = None,
         open_time__gt: datetime.datetime | None = None,
         open_time__gte: datetime.datetime | None = None,
         open_time__lt: datetime.datetime | None = None,
@@ -170,6 +245,7 @@ class DealsStorage:
         close_price__lt: float | None = None,
         close_price__lte: float | None = None,
         count: int | None = None,
+        closed: bool | None = None,
     ) -> collections.abc.Iterable[Deal]: ...
 
 
@@ -199,6 +275,7 @@ class MemoryDealsStorage(DealsStorage):
         self,
         *,
         asset: Asset | None = None,
+        uid: int | None = None,
         open_time__gt: datetime.datetime | None = None,
         open_time__gte: datetime.datetime | None = None,
         open_time__lt: datetime.datetime | None = None,
@@ -216,6 +293,7 @@ class MemoryDealsStorage(DealsStorage):
         close_price__lt: float | None = None,
         close_price__lte: float | None = None,
         count: int | None = None,
+        closed: bool | None = None,
     ) -> collections.abc.Iterable[Deal]:
         def _convert_dt(dt: datetime.datetime) -> float:
             return dt.timestamp()
@@ -224,7 +302,8 @@ class MemoryDealsStorage(DealsStorage):
 
         if asset:
             data = filter(lambda it: it.asset == asset, data)
-
+        if uid:
+            data = filter(lambda it: it.uid == uid, data)
         if open_time__gt:
             data = filter(lambda it: _convert_dt(it.open_time) > _convert_dt(open_time__gt), data)
         if open_time__gte:
@@ -258,6 +337,11 @@ class MemoryDealsStorage(DealsStorage):
             data = filter(lambda it: it.close_price and it.close_price < close_price__lt, data)
         if close_price__lte:
             data = filter(lambda it: it.close_price and it.close_price <= close_price__lte, data)
+
+        if closed is True:
+            data = filter(lambda it: it.close_price is not None, data)
+        if closed is False:
+            data = filter(lambda it: it.close_price is None, data)
 
         data = sorted(data, key=lambda it: it.open_time)
         if count:

@@ -21,7 +21,7 @@ if typing.TYPE_CHECKING:
 
 __all__ = ("BasePocketOptionClient",)
 
-logger = logging.getLogger()
+logger = logging.getLogger("pocket_option")
 
 
 class _Handler[T](typing.TypedDict):
@@ -121,6 +121,7 @@ class BasePocketOptionClient:
             Whether to append a timestamp to each request for caching avoidance.
             Defaults to `False`.
         """
+        self.authorization_data: "models.AuthorizationData | None" = None
         self.middlewares = middlewares or [MakeJsonOnMiddleware(), FixTypesOnMiddleware()]
         self.json = json or get_json_function()
         self.sio = socketio.AsyncClient(
@@ -314,6 +315,8 @@ class BasePocketOptionClient:
         data: "JsonValue | pydantic.BaseModel | None" = None,
         callback: "EmitCallback[JsonValue] | None" = None,
     ) -> None:
+        if event == "auth":
+            self.authorization_data = typing.cast("models.AuthorizationData", data)
         if isinstance(data, pydantic.BaseModel):
             data = data.model_dump(mode="json", by_alias=True)
         if isinstance(data, list):

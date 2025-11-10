@@ -15,6 +15,8 @@ from pocket_option.utils import append_or_replace
 if typing.TYPE_CHECKING:
     from pocket_option.generated_client import PocketOptionClient
 
+__all__ = ("Candle", "CandleStorage", "MemoryCandleStorage")
+
 
 class Candle(pydantic.BaseModel):
     asset: Asset
