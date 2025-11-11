@@ -1,8 +1,6 @@
 import asyncio
-import json
 import logging
 import os
-import pathlib
 
 import aiohttp
 from rich.logging import RichHandler
@@ -67,32 +65,9 @@ async def main():
         await client.emit.change_symbol(models.ChangeSymbolRequest(asset=Asset.EURUSD_otc, period=30))
         await client.emit.subscribe_symbol(Asset.EURUSD_otc)
 
-    @client.add_on("updateAssets")
-    async def on_update_Assets(data):
-        names = [
-            "id",  # ID актива
-            "symbol",  # Символ (#AAPL)
-            "label",  # Название (Apple)
-            "type",  # Тип (stock, forex, crypto и т.д.)
-            "precision",  # Кол-во знаков после запятой
-            "payout",  # Выплата (%)
-            "min_duration",  # Мин. длительность сделки
-            "max_duration",  # Макс. длительность сделки
-            "step_duration",  # Шаг длительности
-            "volatility_index",  # Индекс волатильности / флаг
-            "spread",  # Спред / коэффициент
-            "leverage",  # Плечо
-            "extra_data",  # Доп. данные (список или null)
-            "expire_time",  # Метка времени окончания (timestamp)
-            "is_active",  # Активен ли актив
-            "timeframes",  # Список доступных таймфреймов [{time: 60}, ...]
-            "start_time",  # Время старта (timestamp)
-            "default_timeframe",  # Таймфрейм по умолчанию
-            "status_code",  # Статус / код состояния
-        ]
-        items = [dict(zip(names, it, strict=True)) for it in data]
-        print(items)
-        pathlib.Path("updateAssets.json").write_text(json.dumps(items))
+    @client.on.update_assets
+    async def on_update_Assets(data: list[models.UpdateAssetItem]):
+        print(data)
 
     MemoryCandleStorage(client)
     MemoryDealsStorage(client)

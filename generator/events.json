@@ -42,6 +42,12 @@
             "doc": "Triggered when the list of recently closed deals is updated."
         },
         {
+            "name": "update_assets",
+            "event": "updateAssets",
+            "return_type": "list[models.UpdateAssetItem]",
+            "pydantic_model": "models.UpdateAssetItemListTypeAdapter"
+        },
+        {
             "name": "success_close_order",
             "event": "successcloseOrder",
             "return_type": "models.SuccessCloseOrder",

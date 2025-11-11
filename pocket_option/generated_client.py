@@ -229,6 +229,29 @@ class PocketOptionClientOn:
         return self.client.add_on("updateClosedDeals", handler=handler, model=models.DealListTypeAdapter)
 
     @typing.overload
+    def update_assets(
+        self,
+        handler: None = None,
+    ) -> "typing.Callable[[TypedEventListener[list[models.UpdateAssetItem]]], None]": ...
+
+    @typing.overload
+    def update_assets(
+        self,
+        handler: "TypedEventListener[list[models.UpdateAssetItem]]",
+    ) -> None: ...
+
+    def update_assets(
+        self,
+        handler: "TypedEventListener[list[models.UpdateAssetItem]] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[list[models.UpdateAssetItem]]], None]":
+        """No description
+
+        :param handler: Callback
+        :type handler: TypedEventListener[list[models.UpdateAssetItem]] | None
+        """
+        return self.client.add_on("updateAssets", handler=handler, model=models.UpdateAssetItemListTypeAdapter)
+
+    @typing.overload
     def success_close_order(
         self,
         handler: None = None,
