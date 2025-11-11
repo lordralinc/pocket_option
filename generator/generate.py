@@ -53,7 +53,9 @@ def generate():
     pathlib.Path("pocket_option", "generated_client.py").write_text(layout.render(data=data))
 
     os.system("poetry run ruff format pocket_option/generated_client.py --silent")  # noqa: S605, S607
-    os.system("poetry run ruff check pocket_option/generated_client.py --fix --unsafe-fixes --silent")  # noqa: S605, S607
+    os.system(
+        "poetry run ruff check pocket_option/generated_client.py --fix --unsafe-fixes --silent"
+    )  # noqa: S605, S607
 
 
 if __name__ == "__main__":

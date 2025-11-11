@@ -163,10 +163,12 @@ class BasePocketOptionClient:
 
     async def _get_real_value[T](
         self,
-        value: T
-        | None
-        | collections.abc.Callable[[], T]
-        | collections.abc.Callable[[], collections.abc.Coroutine[None, None, T]],
+        value: (
+            T
+            | None
+            | collections.abc.Callable[[], T]
+            | collections.abc.Callable[[], collections.abc.Coroutine[None, None, T]]
+        ),
     ) -> T | None:
         if callable(value):
             result = value()

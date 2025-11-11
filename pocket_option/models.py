@@ -7,6 +7,8 @@ import pydantic
 
 __all__ = (
     "Asset",
+    "AssetItemTimeframe",
+    "AssetType",
     "AuthorizationData",
     "ChangeSymbolRequest",
     "Command",
@@ -19,6 +21,8 @@ __all__ = (
     "OrderAction",
     "SuccessAuthData",
     "SuccessUpdateBalance",
+    "UpdateAssetItem",
+    "UpdateAssetItemListTypeAdapter",
     "UpdateHistoryFastEvent",
     "UpdateStreamItem",
     "UpdateStreamTypeAdapter",
@@ -323,3 +327,40 @@ class ChangeSymbolRequest(pydantic.BaseModel):
 class SuccessCloseOrder(pydantic.BaseModel):
     profit: float
     deals: list[Deal]
+
+
+class AssetType(enum.StrEnum):
+    STOCK = "stock"
+    COMMODITY = "commodity"
+    CURRENCY = "currency"
+    CRYPTOCURRENCY = "cryptocurrency"
+    INDEX = "index"
+
+
+class AssetItemTimeframe(pydantic.BaseModel):
+    time: int
+
+
+class UpdateAssetItem(pydantic.BaseModel):
+    id: int
+    symbol: Asset
+    label: str
+    type: AssetType
+    precision: int
+    payout: int
+    min_duration: int
+    max_duration: int
+    step_duration: int
+    volatility_index: int
+    spread: int
+    leverage: int
+    extra_data: list[pydantic.JsonValue]
+    expire_time: int
+    is_active: bool
+    timeframes: list[AssetItemTimeframe]
+    start_time: int
+    default_timeframe: int
+    status_code: int
+
+
+UpdateAssetItemListTypeAdapter = pydantic.TypeAdapter(list[UpdateAssetItem])

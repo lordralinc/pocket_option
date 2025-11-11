@@ -14,7 +14,7 @@ class PocketOptionClientEmit:
 
     def __init__(self, client: BasePocketOptionClient) -> None:
         self.client = client
-    
+
 {% for emit in data.emit %}
 {% include 'emit.jinja2' %}
 {% endfor %}
@@ -38,6 +38,3 @@ class PocketOptionClient(BasePocketOptionClient):
     @property
     def emit(self) -> PocketOptionClientEmit:
         return PocketOptionClientEmit(self)
-
-
-

@@ -1,5 +1,5 @@
     async def {{ emit.name }}(
-        self{%if emit.args %}, 
+        self{%if emit.args %},
         {{ emit.args.name }}: {{ emit.args.type }}{% if emit.args.default %}{{ emit.args.default }}{% endif %}{% endif %}
     ) -> None:
         """{{emit.doc or 'No description'}}

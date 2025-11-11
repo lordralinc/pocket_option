@@ -1,21 +1,21 @@
 # ⚡ PocketOption API SDK (Unofficial)
 
-🌐 Available languages:  
+🌐 Available languages:
 [🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)
 
 Asynchronous **Python SDK for interacting with the PocketOption API** (unofficial).
 
-Fully type-hinted, built on `pydantic`, with middleware and event support.  
+Fully type-hinted, built on `pydantic`, with middleware and event support.
 
 Supports Python 3.13+ and is fully asynchronous (`asyncio` + `aiohttp`).
 
-> ⚠️ **Disclaimer**  
+> ⚠️ **Disclaimer**
 
-> ⚠️ This project **is not a trading bot**.  
+> ⚠️ This project **is not a trading bot**.
 
-> ⚠️ It is **not affiliated with PocketOption** and is intended for integrations and analytical purposes only.  
+> ⚠️ It is **not affiliated with PocketOption** and is intended for integrations and analytical purposes only.
 
-> ⚠️ Investing in financial instruments carries risks. Past performance does not guarantee future returns, and asset values may fluctuate due to market conditions and movements in underlying instruments. Any forecasts or illustrations are for informational purposes only and do not constitute guarantees or investment advice. This project is **not an invitation or recommendation to invest**. Before making investment decisions, consult financial, legal, and tax professionals to determine whether such products suit your goals, risk tolerance, and personal circumstances.  
+> ⚠️ Investing in financial instruments carries risks. Past performance does not guarantee future returns, and asset values may fluctuate due to market conditions and movements in underlying instruments. Any forecasts or illustrations are for informational purposes only and do not constitute guarantees or investment advice. This project is **not an invitation or recommendation to invest**. Before making investment decisions, consult financial, legal, and tax professionals to determine whether such products suit your goals, risk tolerance, and personal circumstances.
 
 > P.S. Their demo mode is surprisingly fun to play around with 😎
 
@@ -85,9 +85,9 @@ async def on_update_stream(assets: list[UpdateStreamItem]):
 
 async def main():
     await client.connect(Regions.DEMO)
-    
+
     while True:
-        
+
         direction = get_signal(storage)
 
         if direction is None:

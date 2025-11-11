@@ -16,7 +16,7 @@
         handler: "TypedEventListener[{{ on_method.return_type }}] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[{{ on_method.return_type }}]], None]":
         """{{on_method.doc or 'No description'}}
-        
+
         :param handler: Callback
         :type handler: TypedEventListener[{{ on_method.return_type }}] | None
         """

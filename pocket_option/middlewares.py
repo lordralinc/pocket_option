@@ -13,6 +13,29 @@ __all__ = (
 )
 
 
+UPDATE_ITEMS_NAMES = [
+    "id",  # ID актива
+    "symbol",  # Символ (#AAPL)
+    "label",  # Название (Apple)
+    "type",  # Тип (stock, forex, crypto и т.д.)
+    "precision",  # Кол-во знаков после запятой
+    "payout",  # Выплата (%)
+    "min_duration",  # Мин. длительность сделки
+    "max_duration",  # Макс. длительность сделки
+    "step_duration",  # Шаг длительности
+    "volatility_index",  # Индекс волатильности / флаг
+    "spread",  # Спред / коэффициент
+    "leverage",  # Плечо
+    "extra_data",  # Доп. данные (список или null)
+    "expire_time",  # Метка времени окончания (timestamp)
+    "is_active",  # Активен ли актив
+    "timeframes",  # Список доступных таймфреймов [{time: 60}, ...]
+    "start_time",  # Время старта (timestamp)
+    "default_timeframe",  # Таймфрейм по умолчанию
+    "status_code",  # Статус / код состояния
+]
+
+
 class MakeJsonOnMiddleware(Middleware):
     def __init__(self) -> None:
         self.json = get_json_function()
@@ -37,4 +60,6 @@ class FixTypesOnMiddleware(Middleware):
                 }
                 for it in typing.cast("list[tuple[str, float, float]]", data)
             ]
+        if event == "updateAssets":
+            return [dict(zip(UPDATE_ITEMS_NAMES, it, strict=True)) for it in typing.cast("list[list]", data)]
         return data
