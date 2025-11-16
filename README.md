@@ -1,5 +1,12 @@
 # ⚡ PocketOption API SDK (Unofficial)
 
+[![PyPI version](https://img.shields.io/pypi/v/pocket-option.svg)](https://pypi.org/project/pocket-option)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pocket-option.svg)](https://pypi.org/project/pocket-option)
+[![Downloads](https://pepy.tech/badge/pocket-option)](https://pepy.tech/project/pocket-option)
+[![License](https://img.shields.io/github/license/lordralinc/pocket_option.svg)](https://github.com/lordralinc/pocket_option/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/lordralinc/pocket_option.svg?style=social)](https://github.com/lordralinc/pocket_option/stargazers)
+
+
 🌐 Available languages:
 [🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)
 
@@ -37,20 +44,33 @@ Supports Python 3.13+ and is fully asynchronous (`asyncio` + `aiohttp`).
 
 - ✅ Strict type hints
 
-
 ## ⚙️ Usage Example
 
 ```python
 import asyncio
 import os
+import random
+
 from pocket_option import PocketOptionClient
-from pocket_option.models import Asset, OrderAction
 from pocket_option.constants import Regions
+from pocket_option.contrib.candles import MemoryCandleStorage
+from pocket_option.contrib.deals import MemoryDealsStorage
+from pocket_option.models import (
+    Asset,
+    AuthorizationData,
+    ChangeAssetRequest,
+    DealAction,
+    SuccessAuthEvent,
+    UpdateCloseValueItem,
+)
+
+rnd = random.SystemRandom()
 
 client = PocketOptionClient()
 
 storage = MemoryCandleStorage(client)
 deals = MemoryDealsStorage(client)
+
 
 @client.on.connect
 async def on_connect(data: None):
@@ -68,26 +88,32 @@ async def on_connect(data: None):
         ),
     )
 
+
 @client.on.success_auth
-async def on_success_auth(data: SuccessAuthData):
+async def on_success_auth(data: SuccessAuthEvent):
     print("Success authorized with id %s", data.id)
     await client.emit.indicator_load()
     await client.emit.favorite_load()
     await client.emit.price_alert_load()
-    await client.emit.subscribe_symbol(Asset.AUDCAD_otc)
-    await client.emit.change_symbol(ChangeSymbolRequest(asset=Asset.AUDCAD_otc, period=30))
-    await client.emit.subscribe_for(Asset.AUDCAD_otc)
+    await client.emit.subscribe_to_asset(Asset.AUDCAD_otc)
+    await client.emit.change_asset(ChangeAssetRequest(asset=Asset.AUDCAD_otc, period=30))
+    await client.emit.subscribe_for_market_sentiment(Asset.AUDCAD_otc)
 
 
-@client.on.update_stream
-async def on_update_stream(assets: list[UpdateStreamItem]):
+@client.on.update_close_value
+async def on_update_close_value(assets: list[UpdateCloseValueItem]):
     print("Assets updated: ", assets)
+
+
+def get_signal(storage: MemoryCandleStorage) -> DealAction | None:
+    # magic
+    return rnd.choice([DealAction.CALL, DealAction.PUT, None])
+
 
 async def main():
     await client.connect(Regions.DEMO)
 
     while True:
-
         direction = get_signal(storage)
 
         if direction is None:
@@ -107,8 +133,11 @@ async def main():
         print("✅ Deal result:", result)
         await asyncio.sleep(65)
 
+
 asyncio.run(main())
+
 ```
+
 ## 📜 License
 
 **MIT License** — do whatever you want, but at your own risk.

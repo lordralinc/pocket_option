@@ -37,50 +37,50 @@ class PocketOptionClientEmit:
         """
         await self.client.send("auth", data)
 
-    async def subscribe_symbol(self, asset: models.Asset) -> None:
-        """Subscribes to live updates for a specific asset symbol.
+    async def subscribe_to_asset(self, asset: models.Asset) -> None:
+        """No description
 
-        :param asset: The asset symbol to subscribe to.
+
         :type asset: models.Asset
         """
         await self.client.send("subscribeSymbol", asset)
 
-    async def subscribe_for(self, asset: models.Asset) -> None:
-        """Subscribes to specific data streams for the given asset.
+    async def subscribe_for_market_sentiment(self, asset: models.Asset) -> None:
+        """No description
 
-        :param asset: The asset symbol to subscribe for.
+
         :type asset: models.Asset
         """
         await self.client.send("subfor", asset)
 
-    async def unsubscribe_for(self, asset: models.Asset) -> None:
-        """Unsubscribes from data streams for the given asset.
+    async def unsubscribe_for_market_sentiment(self, asset: models.Asset) -> None:
+        """No description
 
-        :param asset: The asset symbol to unsubscribe from.
+
         :type asset: models.Asset
         """
         await self.client.send("unsubfor", asset)
 
-    async def change_symbol(self, data: models.ChangeSymbolRequest) -> None:
+    async def change_asset(self, data: models.ChangeAssetRequest) -> None:
         """No description
 
 
-        :type data: models.ChangeSymbolRequest
+        :type data: models.ChangeAssetRequest
         """
         await self.client.send("changeSymbol", data)
 
-    async def open_order(self, data: models.OpenOrderRequest) -> None:
-        """Sends a request to open a new trading order.
+    async def open_deal(self, data: models.OpenDealRequest) -> None:
+        """No description
 
-        :param data: Order request payload.
-        :type data: models.OpenOrderRequest
+
+        :type data: models.OpenDealRequest
         """
         await self.client.send("openOrder", data)
 
-    async def copy_signal_order(self, data: models.CopySignalRequest) -> None:
-        """Executes an order based on a copied trading signal.
+    async def copy_signal(self, data: models.CopySignalRequest) -> None:
+        """No description
 
-        :param data: Copy trading signal request payload.
+
         :type data: models.CopySignalRequest
         """
         await self.client.send("copySignalOrder", data)
@@ -91,27 +91,27 @@ class PocketOptionClientOn:
         self.client = client
 
     @typing.overload
-    def success_update_balance(
+    def update_balance(
         self,
         handler: None = None,
-    ) -> "typing.Callable[[TypedEventListener[models.SuccessUpdateBalance]], None]": ...
+    ) -> "typing.Callable[[TypedEventListener[models.SuccessUpdateBalanceEvent]], None]": ...
 
     @typing.overload
-    def success_update_balance(
+    def update_balance(
         self,
-        handler: "TypedEventListener[models.SuccessUpdateBalance]",
+        handler: "TypedEventListener[models.SuccessUpdateBalanceEvent]",
     ) -> None: ...
 
-    def success_update_balance(
+    def update_balance(
         self,
-        handler: "TypedEventListener[models.SuccessUpdateBalance] | None" = None,
-    ) -> "None | typing.Callable[[TypedEventListener[models.SuccessUpdateBalance]], None]":
-        """Triggered when the user's account balance is updated.
+        handler: "TypedEventListener[models.SuccessUpdateBalanceEvent] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[models.SuccessUpdateBalanceEvent]], None]":
+        """No description
 
         :param handler: Callback
-        :type handler: TypedEventListener[models.SuccessUpdateBalance] | None
+        :type handler: TypedEventListener[models.SuccessUpdateBalanceEvent] | None
         """
-        return self.client.add_on("successupdateBalance", handler=handler, model=models.SuccessUpdateBalance)
+        return self.client.add_on("successupdateBalance", handler=handler, model=models.SuccessUpdateBalanceEvent)
 
     @typing.overload
     def update_history_new_fast(
@@ -129,7 +129,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[models.UpdateHistoryFastEvent] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[models.UpdateHistoryFastEvent]], None]":
-        """Triggered when a new fast trading history record is received.
+        """No description
 
         :param handler: Callback
         :type handler: TypedEventListener[models.UpdateHistoryFastEvent] | None
@@ -137,27 +137,27 @@ class PocketOptionClientOn:
         return self.client.add_on("updateHistoryNewFast", handler=handler, model=models.UpdateHistoryFastEvent)
 
     @typing.overload
-    def update_stream(
+    def update_close_value(
         self,
         handler: None = None,
-    ) -> "typing.Callable[[TypedEventListener[list[models.UpdateStreamItem]]], None]": ...
+    ) -> "typing.Callable[[TypedEventListener[list[models.UpdateCloseValueItem]]], None]": ...
 
     @typing.overload
-    def update_stream(
+    def update_close_value(
         self,
-        handler: "TypedEventListener[list[models.UpdateStreamItem]]",
+        handler: "TypedEventListener[list[models.UpdateCloseValueItem]]",
     ) -> None: ...
 
-    def update_stream(
+    def update_close_value(
         self,
-        handler: "TypedEventListener[list[models.UpdateStreamItem]] | None" = None,
-    ) -> "None | typing.Callable[[TypedEventListener[list[models.UpdateStreamItem]]], None]":
-        """Triggered when a live data stream update is received.
+        handler: "TypedEventListener[list[models.UpdateCloseValueItem]] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[list[models.UpdateCloseValueItem]]], None]":
+        """No description
 
         :param handler: Callback
-        :type handler: TypedEventListener[list[models.UpdateStreamItem]] | None
+        :type handler: TypedEventListener[list[models.UpdateCloseValueItem]] | None
         """
-        return self.client.add_on("updateStream", handler=handler, model=models.UpdateStreamTypeAdapter)
+        return self.client.add_on("updateStream", handler=handler, model=models.UpdateCloseValueListTypeAdapter)
 
     @typing.overload
     def update_opened_deals(
@@ -175,7 +175,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[list[models.Deal]] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[list[models.Deal]]], None]":
-        """Triggered when the list of currently opened deals is updated.
+        """No description
 
         :param handler: Callback
         :type handler: TypedEventListener[list[models.Deal]] | None
@@ -183,18 +183,18 @@ class PocketOptionClientOn:
         return self.client.add_on("updateOpenedDeals", handler=handler, model=models.DealListTypeAdapter)
 
     @typing.overload
-    def success_open_order(
+    def success_open_deal(
         self,
         handler: None = None,
     ) -> "typing.Callable[[TypedEventListener[models.Deal]], None]": ...
 
     @typing.overload
-    def success_open_order(
+    def success_open_deal(
         self,
         handler: "TypedEventListener[models.Deal]",
     ) -> None: ...
 
-    def success_open_order(
+    def success_open_deal(
         self,
         handler: "TypedEventListener[models.Deal] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[models.Deal]], None]":
@@ -221,7 +221,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[list[models.Deal]] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[list[models.Deal]]], None]":
-        """Triggered when the list of recently closed deals is updated.
+        """No description
 
         :param handler: Callback
         :type handler: TypedEventListener[list[models.Deal]] | None
@@ -252,27 +252,27 @@ class PocketOptionClientOn:
         return self.client.add_on("updateAssets", handler=handler, model=models.UpdateAssetItemListTypeAdapter)
 
     @typing.overload
-    def success_close_order(
+    def success_close_deal(
         self,
         handler: None = None,
-    ) -> "typing.Callable[[TypedEventListener[models.SuccessCloseOrder]], None]": ...
+    ) -> "typing.Callable[[TypedEventListener[models.SuccessCloseDealEvent]], None]": ...
 
     @typing.overload
-    def success_close_order(
+    def success_close_deal(
         self,
-        handler: "TypedEventListener[models.SuccessCloseOrder]",
+        handler: "TypedEventListener[models.SuccessCloseDealEvent]",
     ) -> None: ...
 
-    def success_close_order(
+    def success_close_deal(
         self,
-        handler: "TypedEventListener[models.SuccessCloseOrder] | None" = None,
-    ) -> "None | typing.Callable[[TypedEventListener[models.SuccessCloseOrder]], None]":
+        handler: "TypedEventListener[models.SuccessCloseDealEvent] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[models.SuccessCloseDealEvent]], None]":
         """No description
 
         :param handler: Callback
-        :type handler: TypedEventListener[models.SuccessCloseOrder] | None
+        :type handler: TypedEventListener[models.SuccessCloseDealEvent] | None
         """
-        return self.client.add_on("successcloseOrder", handler=handler, model=models.SuccessCloseOrder)
+        return self.client.add_on("successcloseOrder", handler=handler, model=models.SuccessCloseDealEvent)
 
     @typing.overload
     def connect(
@@ -324,24 +324,47 @@ class PocketOptionClientOn:
     def success_auth(
         self,
         handler: None = None,
-    ) -> "typing.Callable[[TypedEventListener[models.SuccessAuthData]], None]": ...
+    ) -> "typing.Callable[[TypedEventListener[models.SuccessAuthEvent]], None]": ...
 
     @typing.overload
     def success_auth(
         self,
-        handler: "TypedEventListener[models.SuccessAuthData]",
+        handler: "TypedEventListener[models.SuccessAuthEvent]",
     ) -> None: ...
 
     def success_auth(
         self,
-        handler: "TypedEventListener[models.SuccessAuthData] | None" = None,
-    ) -> "None | typing.Callable[[TypedEventListener[models.SuccessAuthData]], None]":
+        handler: "TypedEventListener[models.SuccessAuthEvent] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[models.SuccessAuthEvent]], None]":
         """No description
 
         :param handler: Callback
-        :type handler: TypedEventListener[models.SuccessAuthData] | None
+        :type handler: TypedEventListener[models.SuccessAuthEvent] | None
         """
-        return self.client.add_on("successauth", handler=handler, model=models.SuccessAuthData)
+        return self.client.add_on("successauth", handler=handler, model=models.SuccessAuthEvent)
+
+    @typing.overload
+    def change_market_sentiment(
+        self,
+        handler: None = None,
+    ) -> "typing.Callable[[TypedEventListener[list[models.MarketSentimentItem]]], None]": ...
+
+    @typing.overload
+    def change_market_sentiment(
+        self,
+        handler: "TypedEventListener[list[models.MarketSentimentItem]]",
+    ) -> None: ...
+
+    def change_market_sentiment(
+        self,
+        handler: "TypedEventListener[list[models.MarketSentimentItem]] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[list[models.MarketSentimentItem]]], None]":
+        """No description
+
+        :param handler: Callback
+        :type handler: TypedEventListener[list[models.MarketSentimentItem]] | None
+        """
+        return self.client.add_on("chafor", handler=handler, model=models.MarketSentimentItemListTypeAdapter)
 
 
 class PocketOptionClient(BasePocketOptionClient):

@@ -17,7 +17,7 @@ from pocket_option.constants import (
 )
 from pocket_option.errors import DealError
 from pocket_option.generated_client import PocketOptionClient
-from pocket_option.models import Asset, Deal, IsDemo, OpenOrderRequest, OrderAction, SuccessCloseOrder
+from pocket_option.models import Asset, Deal, DealAction, IsDemo, OpenDealRequest, SuccessCloseDealEvent
 from pocket_option.utils import append_or_replace, generate_request_id
 
 if typing.TYPE_CHECKING:
@@ -35,8 +35,8 @@ class DealsStorage:
         self._open_deal_events: dict[int, asyncio.Event] = {}
         self._close_deal_events: dict[uuid.UUID, asyncio.Event] = {}
 
-        self.client.on.success_open_order(self._on_success_deal)
-        self.client.on.success_close_order(self._on_success_close_deal)
+        self.client.on.success_open_deal(self._on_success_open_deal)
+        self.client.on.success_close_deal(self._on_success_close_deal)
         self.client.on.update_opened_deals(self.add_or_update_deal_bulk)
         self.client.on.update_closed_deals(self.add_or_update_deal_bulk)
 
@@ -44,7 +44,7 @@ class DealsStorage:
         self,
         asset: Asset,
         amount: int,
-        action: OrderAction,
+        action: DealAction,
         time: int,
         is_demo: IsDemo = 1,
         request_id: int | None = None,
@@ -105,8 +105,8 @@ class DealsStorage:
 
         request_id = request_id or generate_request_id()
         self._open_deal_events[request_id] = asyncio.Event()
-        await self.client.emit.open_order(
-            OpenOrderRequest(
+        await self.client.emit.open_deal(
+            OpenDealRequest(
                 asset=asset,
                 amount=amount,
                 action=action,
@@ -183,13 +183,13 @@ class DealsStorage:
             return deal
         raise RuntimeError("Failed to find deal")
 
-    async def _on_success_deal(self, deal: Deal):
+    async def _on_success_open_deal(self, deal: Deal):
         await self.add_or_update_deal(deal)
         if deal.request_id and self._open_deal_events.get(deal.request_id):
             self._open_deal_events[deal.request_id].set()
             del self._open_deal_events[deal.request_id]
 
-    async def _on_success_close_deal(self, close_deal: SuccessCloseOrder) -> None:
+    async def _on_success_close_deal(self, close_deal: SuccessCloseDealEvent) -> None:
         await self.add_or_update_deal_bulk(close_deal.deals)
         for deal in close_deal.deals:
             if event := self._close_deal_events.pop(deal.id):

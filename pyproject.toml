@@ -1,6 +1,6 @@
 [project]
 name = "pocket-option"
-version = "0.1.3"
+version = "0.1.4"
 description = "Async API client for Pocket Option platform"
 authors = [{ name = "Yury \"lordralinc\" Yushmanov" }]
 license = "MIT"
@@ -12,6 +12,30 @@ dependencies = [
     "pydantic (>=2.12.3,<3.0.0)",
     "pytz (>=2025.2,<2026.0)",
     "brotli (>=1.2.0,<2.0.0)",
+]
+keywords = [
+    "pocket option",
+    "pocket-option",
+    "pocketoption",
+    "trading",
+    "binary options",
+    "options",
+    "finance",
+    "fintech",
+    "api",
+    "api client",
+    "trading bot",
+    "algorithmic trading",
+    "automated trading",
+    "websocket",
+    "websocket client",
+    "market data",
+    "quotes",
+    "forex",
+    "crypto trading",
+    "crypto",
+    "exchange",
+    "python client",
 ]
 
 [project.urls]

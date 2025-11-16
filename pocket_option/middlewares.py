@@ -62,4 +62,7 @@ class FixTypesOnMiddleware(Middleware):
             ]
         if event == "updateAssets":
             return [dict(zip(UPDATE_ITEMS_NAMES, it, strict=True)) for it in typing.cast("list[list]", data)]
+        if event == "chafor":
+            return [dict(zip(["asset", "value"], it, strict=True)) for it in typing.cast("list[list]", data)]
+
         return data

@@ -1,35 +1,31 @@
 {
     "on": [
         {
-            "name": "success_update_balance",
+            "name": "update_balance",
             "event": "successupdateBalance",
-            "return_type": "models.SuccessUpdateBalance",
-            "pydantic_model": "models.SuccessUpdateBalance",
-            "doc": "Triggered when the user's account balance is updated."
+            "return_type": "models.SuccessUpdateBalanceEvent",
+            "pydantic_model": "models.SuccessUpdateBalanceEvent"
         },
         {
             "name": "update_history_new_fast",
             "event": "updateHistoryNewFast",
             "return_type": "models.UpdateHistoryFastEvent",
-            "pydantic_model": "models.UpdateHistoryFastEvent",
-            "doc": "Triggered when a new fast trading history record is received."
+            "pydantic_model": "models.UpdateHistoryFastEvent"
         },
         {
-            "name": "update_stream",
+            "name": "update_close_value",
             "event": "updateStream",
-            "return_type": "list[models.UpdateStreamItem]",
-            "pydantic_model": "models.UpdateStreamTypeAdapter",
-            "doc": "Triggered when a live data stream update is received."
+            "return_type": "list[models.UpdateCloseValueItem]",
+            "pydantic_model": "models.UpdateCloseValueListTypeAdapter"
         },
         {
             "name": "update_opened_deals",
             "event": "updateOpenedDeals",
             "return_type": "list[models.Deal]",
-            "pydantic_model": "models.DealListTypeAdapter",
-            "doc": "Triggered when the list of currently opened deals is updated."
+            "pydantic_model": "models.DealListTypeAdapter"
         },
         {
-            "name": "success_open_order",
+            "name": "success_open_deal",
             "event": "successopenOrder",
             "return_type": "models.Deal",
             "pydantic_model": "models.Deal"
@@ -38,8 +34,7 @@
             "name": "update_closed_deals",
             "event": "updateClosedDeals",
             "return_type": "list[models.Deal]",
-            "pydantic_model": "models.DealListTypeAdapter",
-            "doc": "Triggered when the list of recently closed deals is updated."
+            "pydantic_model": "models.DealListTypeAdapter"
         },
         {
             "name": "update_assets",
@@ -48,10 +43,10 @@
             "pydantic_model": "models.UpdateAssetItemListTypeAdapter"
         },
         {
-            "name": "success_close_order",
+            "name": "success_close_deal",
             "event": "successcloseOrder",
-            "return_type": "models.SuccessCloseOrder",
-            "pydantic_model": "models.SuccessCloseOrder"
+            "return_type": "models.SuccessCloseDealEvent",
+            "pydantic_model": "models.SuccessCloseDealEvent"
         },
         {
             "name": "connect",
@@ -68,8 +63,14 @@
         {
             "name": "success_auth",
             "event": "successauth",
-            "return_type": "models.SuccessAuthData",
-            "pydantic_model": "models.SuccessAuthData"
+            "return_type": "models.SuccessAuthEvent",
+            "pydantic_model": "models.SuccessAuthEvent"
+        },
+        {
+            "name": "change_market_sentiment",
+            "event": "chafor",
+            "return_type": "list[models.MarketSentimentItem]",
+            "pydantic_model": "models.MarketSentimentItemListTypeAdapter"
         }
     ],
     "emit": [
@@ -98,62 +99,52 @@
             }
         },
         {
-            "name": "subscribe_symbol",
+            "name": "subscribe_to_asset",
             "event": "subscribeSymbol",
             "args": {
                 "name": "asset",
-                "type": "models.Asset",
-                "doc": "The asset symbol to subscribe to."
-            },
-            "doc": "Subscribes to live updates for a specific asset symbol."
-        },
-        {
-            "name": "subscribe_for",
-            "event": "subfor",
-            "args": {
-                "name": "asset",
-                "type": "models.Asset",
-                "doc": "The asset symbol to subscribe for."
-            },
-            "doc": "Subscribes to specific data streams for the given asset."
-        },
-        {
-            "name": "unsubscribe_for",
-            "event": "unsubfor",
-            "args": {
-                "name": "asset",
-                "type": "models.Asset",
-                "doc": "The asset symbol to unsubscribe from."
-            },
-            "doc": "Unsubscribes from data streams for the given asset."
-        },
-        {
-            "name": "change_symbol",
-            "event": "changeSymbol",
-            "args": {
-                "name": "data",
-                "type": "models.ChangeSymbolRequest"
+                "type": "models.Asset"
             }
         },
         {
-            "name": "open_order",
+            "name": "subscribe_for_market_sentiment",
+            "event": "subfor",
+            "args": {
+                "name": "asset",
+                "type": "models.Asset"
+            }
+        },
+        {
+            "name": "unsubscribe_for_market_sentiment",
+            "event": "unsubfor",
+            "args": {
+                "name": "asset",
+                "type": "models.Asset"
+            }
+        },
+        {
+            "name": "change_asset",
+            "event": "changeSymbol",
+            "args": {
+                "name": "data",
+                "type": "models.ChangeAssetRequest"
+            }
+        },
+        {
+            "name": "open_deal",
             "event": "openOrder",
             "args": {
                 "name": "data",
-                "type": "models.OpenOrderRequest",
-                "doc": "Order request payload."
-            },
-            "doc": "Sends a request to open a new trading order."
+                "type": "models.OpenDealRequest"
+            }
         },
         {
-            "name": "copy_signal_order",
+            "name": "copy_signal",
             "event": "copySignalOrder",
             "args": {
                 "name": "data",
-                "type": "models.CopySignalRequest",
-                "doc": "Copy trading signal request payload."
-            },
-            "doc": "Executes an order based on a copied trading signal."
+                "type": "models.CopySignalRequest"
+            }
         }
     ]
 }

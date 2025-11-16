@@ -9,7 +9,7 @@ from pocket_option import PocketOptionClient, models
 from pocket_option.constants import Regions
 from pocket_option.contrib.candles import MemoryCandleStorage
 from pocket_option.contrib.deals import MemoryDealsStorage
-from pocket_option.models import Asset, Deal, OrderAction, UpdateStreamItem
+from pocket_option.models import Asset
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -57,13 +57,13 @@ async def main():
         )
 
     @client.on.success_auth
-    async def on_success_auth(data: models.SuccessAuthData):
+    async def on_success_auth(data: models.SuccessAuthEvent):
         await client.emit.favorite_load()
         await client.emit.indicator_load()
         await client.emit.price_alert_load()
-        await client.emit.subscribe_for(Asset.EURUSD_otc)
-        await client.emit.change_symbol(models.ChangeSymbolRequest(asset=Asset.EURUSD_otc, period=30))
-        await client.emit.subscribe_symbol(Asset.EURUSD_otc)
+        await client.emit.subscribe_to_asset(Asset.EURUSD_otc)
+        await client.emit.change_asset(models.ChangeAssetRequest(asset=Asset.EURUSD_otc, period=30))
+        await client.emit.subscribe_for_market_sentiment(Asset.EURUSD_otc)
 
     @client.on.update_assets
     async def on_update_Assets(data: list[models.UpdateAssetItem]):

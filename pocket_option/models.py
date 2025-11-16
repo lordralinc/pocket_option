@@ -10,22 +10,24 @@ __all__ = (
     "AssetItemTimeframe",
     "AssetType",
     "AuthorizationData",
-    "ChangeSymbolRequest",
+    "ChangeAssetRequest",
     "Command",
     "CopySignalRequest",
     "Deal",
+    "DealAction",
     "IsDemo",
-    "OpenOrderRequest",
-    "OpenPendingOrderRequest",
-    "OpenPendingOrderRequestOpenType",
-    "OrderAction",
-    "SuccessAuthData",
-    "SuccessUpdateBalance",
+    "MarketSentimentItem",
+    "MarketSentimentItemListTypeAdapter",
+    "OpenDealRequest",
+    "OpenPendingDealRequest",
+    "OpenPendingDealRequestOpenType",
+    "SuccessAuthEvent",
+    "SuccessUpdateBalanceEvent",
     "UpdateAssetItem",
     "UpdateAssetItemListTypeAdapter",
+    "UpdateCloseValueItem",
+    "UpdateCloseValueListTypeAdapter",
     "UpdateHistoryFastEvent",
-    "UpdateStreamItem",
-    "UpdateStreamTypeAdapter",
 )
 
 type IsDemo = typing.Literal[0, 1]
@@ -203,10 +205,6 @@ class Asset(str, enum.Enum):
         return core_schema.no_info_after_validator_function(cls, core_schema.str_schema())
 
 
-class SuccessAuthData(pydantic.BaseModel):
-    id: str
-
-
 class AuthorizationData(pydantic.BaseModel):
     session: str
     is_demo: typing.Annotated[IsDemo, pydantic.Field(..., alias="isDemo")]
@@ -216,7 +214,11 @@ class AuthorizationData(pydantic.BaseModel):
     is_optimized: typing.Annotated[bool, pydantic.Field(..., alias="isOptimized")]
 
 
-class SuccessUpdateBalance(pydantic.BaseModel):
+class SuccessAuthEvent(pydantic.BaseModel):
+    id: str
+
+
+class SuccessUpdateBalanceEvent(pydantic.BaseModel):
     is_demo: typing.Annotated[IsDemo, pydantic.Field(..., alias="isDemo")]
     balance: float
 
@@ -227,16 +229,16 @@ class UpdateHistoryFastEvent(pydantic.BaseModel):
     history: list[list[float]]
 
 
-class UpdateStreamItem(pydantic.BaseModel):
+class UpdateCloseValueItem(pydantic.BaseModel):
     asset: Asset
     timestamp: float
     value: float
 
 
-UpdateStreamTypeAdapter = pydantic.TypeAdapter(list[UpdateStreamItem])
+UpdateCloseValueListTypeAdapter = pydantic.TypeAdapter(list[UpdateCloseValueItem])
 
 
-class OpenPendingOrderRequestOpenType(enum.IntEnum):
+class OpenPendingDealRequestOpenType(enum.IntEnum):
     TIME = 0
     PRICE = 1
 
@@ -248,22 +250,27 @@ class Command(enum.IntEnum):
 
 class Deal(pydantic.BaseModel):
     id: uuid.UUID
+    command: Command
+    asset: Asset
+
+    uid: int
+    amount: float
+    is_demo: typing.Annotated[IsDemo, pydantic.Field(..., alias="isDemo")]
+
+    profit: float
+    percent_profit: typing.Annotated[float, pydantic.Field(..., alias="percentProfit")]
+    percent_loss: typing.Annotated[float, pydantic.Field(..., alias="percentLoss")]
+
     open_time: typing.Annotated[datetime.datetime, pydantic.Field(..., alias="openTime")]
     close_time: typing.Annotated[datetime.datetime, pydantic.Field(..., alias="closeTime")]
     open_timestamp: typing.Annotated[float, pydantic.Field(..., alias="openTimestamp")]
     close_timestamp: typing.Annotated[float | None, pydantic.Field(None, alias="closeTimestamp")]
     refund_time: typing.Annotated[datetime.datetime | None, pydantic.Field(None, alias="refundTime")]
     refund_timestamp: typing.Annotated[int | None, pydantic.Field(None, alias="refundTimestamp")]
-    uid: int
-    amount: float
-    profit: float
-    percent_profit: typing.Annotated[float, pydantic.Field(..., alias="percentProfit")]
-    percent_loss: typing.Annotated[float, pydantic.Field(..., alias="percentLoss")]
+
     open_price: typing.Annotated[float, pydantic.Field(..., alias="openPrice")]
     close_price: typing.Annotated[float | None, pydantic.Field(None, alias="closePrice")]
-    command: Command
-    asset: Asset
-    is_demo: typing.Annotated[IsDemo, pydantic.Field(..., alias="isDemo")]
+
     copy_ticket: typing.Annotated[str, pydantic.Field(..., alias="copyTicket")]
     open_ms: typing.Annotated[int | None, pydantic.Field(None, alias="openMs")]
     close_ms: typing.Annotated[int | None, pydantic.Field(None, alias="closeMs")]
@@ -279,17 +286,17 @@ class Deal(pydantic.BaseModel):
 DealListTypeAdapter = pydantic.TypeAdapter(list[Deal])
 
 
-class OrderAction(enum.StrEnum):
+class DealAction(enum.StrEnum):
     CALL = "call"
     PUT = "put"
 
 
-class OpenOrderRequest(pydantic.BaseModel):
+class OpenDealRequest(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     asset: Asset
     amount: int
-    action: OrderAction
+    action: DealAction
     is_demo: typing.Annotated[IsDemo, pydantic.Field(..., alias="isDemo")]
     request_id: typing.Annotated[int, pydantic.Field(..., alias="requestId")]
     option_type: typing.Annotated[int, pydantic.Field(..., alias="optionType")]
@@ -300,7 +307,7 @@ class CopySignalRequest(pydantic.BaseModel):
     symbol: Asset
     amount: int
     expired_at: typing.Annotated[int, pydantic.Field(..., alias="expiredAt")]
-    action: OrderAction
+    action: DealAction
     is_demo: typing.Annotated[IsDemo, pydantic.Field(..., alias="isDemo")]
     request_id: typing.Annotated[int, pydantic.Field(..., alias="requestId")]
     created_at: typing.Annotated[int, pydantic.Field(..., alias="createdAt")]
@@ -308,8 +315,8 @@ class CopySignalRequest(pydantic.BaseModel):
     signal_id: typing.Annotated[str, pydantic.Field(..., alias="signalId")]
 
 
-class OpenPendingOrderRequest(pydantic.BaseModel):
-    open_type: typing.Annotated[OpenPendingOrderRequestOpenType, pydantic.Field(..., alias="openType")]
+class OpenPendingDealRequest(pydantic.BaseModel):
+    open_type: typing.Annotated[OpenPendingDealRequestOpenType, pydantic.Field(..., alias="openType")]
     amount: int
     asset: Asset
     open_time: typing.Annotated[str, pydantic.Field(..., alias="openTime")]
@@ -319,12 +326,12 @@ class OpenPendingOrderRequest(pydantic.BaseModel):
     command: Command
 
 
-class ChangeSymbolRequest(pydantic.BaseModel):
+class ChangeAssetRequest(pydantic.BaseModel):
     asset: Asset
     period: int
 
 
-class SuccessCloseOrder(pydantic.BaseModel):
+class SuccessCloseDealEvent(pydantic.BaseModel):
     profit: float
     deals: list[Deal]
 
@@ -343,7 +350,7 @@ class AssetItemTimeframe(pydantic.BaseModel):
 
 class UpdateAssetItem(pydantic.BaseModel):
     id: int
-    symbol: Asset
+    asset: typing.Annotated[Asset, pydantic.Field(..., alias="symbol")]
     label: str
     type: AssetType
     precision: int
@@ -364,3 +371,11 @@ class UpdateAssetItem(pydantic.BaseModel):
 
 
 UpdateAssetItemListTypeAdapter = pydantic.TypeAdapter(list[UpdateAssetItem])
+
+
+class MarketSentimentItem(pydantic.BaseModel):
+    asset: Asset
+    value: int
+
+
+MarketSentimentItemListTypeAdapter = pydantic.TypeAdapter(list[MarketSentimentItem])
