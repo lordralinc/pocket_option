@@ -21,8 +21,6 @@ if typing.TYPE_CHECKING:
 
 __all__ = ("BasePocketOptionClient",)
 
-logger = logging.getLogger("pocket_option")
-
 
 class _Handler[T](typing.TypedDict):
     name: str
@@ -40,7 +38,7 @@ class BasePocketOptionClient:
         reconnection_delay: float = 1.0,
         reconnection_delay_max: float = 5.0,
         randomization_factor: float = 0.5,
-        logger: bool = False,
+        logger: bool | logging.Logger = False,
         engineio_logger: bool = False,
         json: "JsonFunction | None" = None,
         handle_sigint: bool = True,
@@ -130,7 +128,7 @@ class BasePocketOptionClient:
             reconnection_delay=reconnection_delay,  # pyright: ignore[reportArgumentType]
             reconnection_delay_max=reconnection_delay_max,  # pyright: ignore[reportArgumentType]
             randomization_factor=randomization_factor,
-            logger=logger,
+            logger=logger is not False,
             serializer="default",
             json=self.json,
             handle_sigint=handle_sigint,
@@ -152,6 +150,11 @@ class BasePocketOptionClient:
         self.sio.on("connect", handler=self.handle_connect_event)
         self.sio.on("disconnect", handler=self.handle_disconnect_event)
         self.sio.on("*", handler=self.handle_new_event)
+
+        if isinstance(logger, logging.Logger):
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger("pocket_option.client")
 
     def get_auth_from_packet(self, packet: str) -> "models.AuthorizationData":
         packet = packet.removeprefix("42")
@@ -228,19 +231,19 @@ class BasePocketOptionClient:
 
     async def _handle_event(self, event_name: str, data: bytes | None = None) -> "JsonValue | None":
         results = []
-        logger.debug("New event '%s' with data %r", event_name, data)
+        self.logger.debug("New event '%s' with data %r", event_name, data)
         for handler in filter(lambda x: x["name"] == event_name, self.handlers):
             try:
                 result = await handler["callback"](data)
                 results.append(result)
             except Exception:
-                logger.exception(
+                self.logger.exception(
                     "Error on handler %s, %s",
                     handler["name"],
                     get_function_full_name(handler["callback"]),
                 )
             else:
-                logger.debug(
+                self.logger.debug(
                     "Handled by '%s' with result %r",
                     get_function_full_name(handler["callback"]),
                     result,
@@ -327,7 +330,7 @@ class BasePocketOptionClient:
             ]
         for middleware in self.middlewares:
             event, data, callback = await middleware.emit(event, data=data, callback=callback)
-        logger.debug(
+        self.logger.debug(
             "Emitting event '%s' with data %r",
             event,
             data if event != "auth" else {**typing.cast("dict[str, JsonValue]", data), "session": "***"},

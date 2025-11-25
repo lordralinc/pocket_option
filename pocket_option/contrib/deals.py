@@ -90,7 +90,7 @@ class DealsStorage:
                     },
                 )
             if not self.client.authorization_data:
-                logger.warning("Failed to check concurent orders: no authorization data")
+                self.client.logger.warning("Failed to check concurent orders: no authorization data")
             if self.client.authorization_data:
                 orders = await self.get_deals(uid=self.client.authorization_data.uid, closed=False)
                 if len(list(orders)) > API_LIMITS_MAX_CONCURRENT_ORDERS:
