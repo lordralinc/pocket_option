@@ -1,22 +1,21 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:poetry",
-    "python-envs.pythonProjects": [],
-    "python-envs.defaultPackageManager": "ms-python.python:poetry",
-    "emeraldwalk.runonsave": {
-        "commands": [
-            {
-                "match": "events.json$",
-                "cmd": "poetry run python generator/generate.py",
-                "messageAfter": "Client generated"
-            }
-        ]
-    },
-    "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/.DS_Store": true,
-        "**/Thumbs.db": true,
-        "**/__pycache__": true
-    }
+  "python-envs.defaultEnvManager": "ms-python.python:poetry",
+  "python-envs.defaultPackageManager": "ms-python.python:poetry",
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "events.json$",
+        "cmd": "poetry run python generator/generate.py",
+        "messageAfter": "Client generated"
+      }
+    ]
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/__pycache__": true
+  }
 }

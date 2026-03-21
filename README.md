@@ -44,6 +44,24 @@ Supports Python 3.13+ and is fully asynchronous (`asyncio` + `aiohttp`).
 
 - ✅ Strict type hints
 
+## 🔑 Getting Session ID and UID
+
+To interact with the API, you need a valid session payload from the browser.
+
+1. Open Pocket Option in your browser
+2. Open Developer Tools
+3. Go to the **Network** tab
+4. Filter by **WebSocket (WS)**
+5. Find a request to {region}...
+6. Fimd message containing `42["auth"`
+7. Copy the `session` and `uid`
+
+**Example**:
+
+```json
+42["auth",{"session":"abcd1234efgh5678","isDemo":1,"uid":1234589,"platform":1}]
+```
+
 ## ⚙️ Usage Example
 
 ```python
