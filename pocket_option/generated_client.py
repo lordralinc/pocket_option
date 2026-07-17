@@ -14,73 +14,73 @@ class PocketOptionClientEmit:
         self.client = client
 
     async def ps(self) -> None:
-        """No description"""
+        """Sends a heartbeat request to keep the connection alive."""
         await self.client.send("ps")
 
     async def indicator_load(self) -> None:
-        """No description"""
+        """Indicates that indicator data has been loaded by the platform."""
         await self.client.send("indicator/load")
 
     async def favorite_load(self) -> None:
-        """No description"""
+        """Indicates that favorite has been loaded by the platform."""
         await self.client.send("favorite/load")
 
     async def price_alert_load(self) -> None:
-        """No description"""
+        """Indicates that price alert data has been loaded by the platform."""
         await self.client.send("price-alert/load")
 
     async def auth(self, data: models.AuthorizationData) -> None:
-        """No description
+        """Authorizes the client session.
 
-
+        :param data: Authorization payload containing session and account information.
         :type data: models.AuthorizationData
         """
         await self.client.send("auth", data)
 
     async def subscribe_to_asset(self, asset: models.Asset) -> None:
-        """No description
+        """Subscribes to real-time updates for a trading asset.
 
-
+        :param asset: Trading asset to subscribe.
         :type asset: models.Asset
         """
         await self.client.send("subscribeSymbol", asset)
 
     async def subscribe_for_market_sentiment(self, asset: models.Asset) -> None:
-        """No description
+        """Subscribes to market sentiment updates for an asset.
 
-
+        :param asset: Trading asset for sentiment tracking.
         :type asset: models.Asset
         """
         await self.client.send("subfor", asset)
 
     async def unsubscribe_for_market_sentiment(self, asset: models.Asset) -> None:
-        """No description
+        """Removes market sentiment subscription for an asset.
 
-
+        :param asset: Trading asset to remove from sentiment tracking.
         :type asset: models.Asset
         """
         await self.client.send("unsubfor", asset)
 
     async def change_asset(self, data: models.ChangeAssetRequest) -> None:
-        """No description
+        """Changes the active trading asset and timeframe.
 
-
+        :param data: Asset change request parameters.
         :type data: models.ChangeAssetRequest
         """
         await self.client.send("changeSymbol", data)
 
     async def open_deal(self, data: models.OpenDealRequest) -> None:
-        """No description
+        """Creates a new trading deal.
 
-
+        :param data: Deal opening parameters.
         :type data: models.OpenDealRequest
         """
         await self.client.send("openOrder", data)
 
     async def copy_signal(self, data: models.CopySignalRequest) -> None:
-        """No description
+        """Creates a deal from a copy trading signal.
 
-
+        :param data: Copy signal execution parameters.
         :type data: models.CopySignalRequest
         """
         await self.client.send("copySignalOrder", data)
@@ -106,7 +106,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[models.SuccessUpdateBalanceEvent] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[models.SuccessUpdateBalanceEvent]], None]":
-        """No description
+        """Triggered when account balance information is updated.
 
         :param handler: Callback
         :type handler: TypedEventListener[models.SuccessUpdateBalanceEvent] | None
@@ -129,7 +129,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[models.UpdateHistoryFastEvent] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[models.UpdateHistoryFastEvent]], None]":
-        """No description
+        """Triggered when fast historical market data is received.
 
         :param handler: Callback
         :type handler: TypedEventListener[models.UpdateHistoryFastEvent] | None
@@ -152,7 +152,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[list[models.UpdateCloseValueItem]] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[list[models.UpdateCloseValueItem]]], None]":
-        """No description
+        """Triggered when real-time price stream values are updated.
 
         :param handler: Callback
         :type handler: TypedEventListener[list[models.UpdateCloseValueItem]] | None
@@ -175,7 +175,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[list[models.Deal]] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[list[models.Deal]]], None]":
-        """No description
+        """Triggered when the list of opened deals is updated.
 
         :param handler: Callback
         :type handler: TypedEventListener[list[models.Deal]] | None
@@ -198,7 +198,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[models.Deal] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[models.Deal]], None]":
-        """No description
+        """Triggered after a new deal is successfully opened.
 
         :param handler: Callback
         :type handler: TypedEventListener[models.Deal] | None
@@ -221,7 +221,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[list[models.Deal]] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[list[models.Deal]]], None]":
-        """No description
+        """Triggered when closed deals information is updated.
 
         :param handler: Callback
         :type handler: TypedEventListener[list[models.Deal]] | None
@@ -244,7 +244,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[list[models.UpdateAssetItem]] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[list[models.UpdateAssetItem]]], None]":
-        """No description
+        """Triggered when available trading assets metadata is updated.
 
         :param handler: Callback
         :type handler: TypedEventListener[list[models.UpdateAssetItem]] | None
@@ -267,7 +267,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[models.SuccessCloseDealEvent] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[models.SuccessCloseDealEvent]], None]":
-        """No description
+        """Triggered after one or more deals are successfully closed.
 
         :param handler: Callback
         :type handler: TypedEventListener[models.SuccessCloseDealEvent] | None
@@ -290,7 +290,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[None] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[None]], None]":
-        """No description
+        """Triggered when the Socket.IO connection is established.
 
         :param handler: Callback
         :type handler: TypedEventListener[None] | None
@@ -313,7 +313,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[None] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[None]], None]":
-        """No description
+        """Triggered when the Socket.IO connection is closed.
 
         :param handler: Callback
         :type handler: TypedEventListener[None] | None
@@ -336,7 +336,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[models.SuccessAuthEvent] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[models.SuccessAuthEvent]], None]":
-        """No description
+        """Triggered after successful account authorization.
 
         :param handler: Callback
         :type handler: TypedEventListener[models.SuccessAuthEvent] | None
@@ -359,7 +359,7 @@ class PocketOptionClientOn:
         self,
         handler: "TypedEventListener[list[models.MarketSentimentItem]] | None" = None,
     ) -> "None | typing.Callable[[TypedEventListener[list[models.MarketSentimentItem]]], None]":
-        """No description
+        """Triggered when market sentiment data is updated.
 
         :param handler: Callback
         :type handler: TypedEventListener[list[models.MarketSentimentItem]] | None

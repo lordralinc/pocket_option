@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
-import os
 import pathlib
+import subprocess
 
 import jinja2
 import pydantic
@@ -52,10 +54,30 @@ def generate():
     layout = env.get_template("layout.jinja2")
     pathlib.Path("pocket_option", "generated_client.py").write_text(layout.render(data=data))
 
-    os.system("poetry run ruff format pocket_option/generated_client.py --silent")  # noqa: S605, S607
-    os.system(
-        "poetry run ruff check pocket_option/generated_client.py --fix --unsafe-fixes --silent"
-    )  # noqa: S605, S607
+    subprocess.run(
+        [  # noqa: S607
+            "poetry",
+            "run",
+            "ruff",
+            "format",
+            "pocket_option/generated_client.py",
+            "--silent",
+        ],
+        check=True,
+    )
+    subprocess.run(
+        [  # noqa: S607
+            "poetry",
+            "run",
+            "ruff",
+            "check",
+            "pocket_option/generated_client.py",
+            "--fix",
+            "--unsafe-fixes",
+            "--silent",
+        ],
+        check=True,
+    )
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from . import constants
 from .generated_client import PocketOptionClient
 from .models import (
@@ -25,15 +27,15 @@ __all__ = (
     "Command",
     "CopySignalRequest",
     "Deal",
+    "DealAction",
     "IsDemo",
     "OpenDealRequest",
     "OpenPendingDealRequest",
     "OpenPendingDealRequestOpenType",
-    "DealAction",
     "PocketOptionClient",
     "SuccessUpdateBalanceEvent",
-    "UpdateHistoryFastEvent",
     "UpdateCloseValueItem",
     "UpdateCloseValueListTypeAdapter",
+    "UpdateHistoryFastEvent",
     "constants",
 )

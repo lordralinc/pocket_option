@@ -1,150 +1,180 @@
 {
-    "on": [
-        {
-            "name": "update_balance",
-            "event": "successupdateBalance",
-            "return_type": "models.SuccessUpdateBalanceEvent",
-            "pydantic_model": "models.SuccessUpdateBalanceEvent"
-        },
-        {
-            "name": "update_history_new_fast",
-            "event": "updateHistoryNewFast",
-            "return_type": "models.UpdateHistoryFastEvent",
-            "pydantic_model": "models.UpdateHistoryFastEvent"
-        },
-        {
-            "name": "update_close_value",
-            "event": "updateStream",
-            "return_type": "list[models.UpdateCloseValueItem]",
-            "pydantic_model": "models.UpdateCloseValueListTypeAdapter"
-        },
-        {
-            "name": "update_opened_deals",
-            "event": "updateOpenedDeals",
-            "return_type": "list[models.Deal]",
-            "pydantic_model": "models.DealListTypeAdapter"
-        },
-        {
-            "name": "success_open_deal",
-            "event": "successopenOrder",
-            "return_type": "models.Deal",
-            "pydantic_model": "models.Deal"
-        },
-        {
-            "name": "update_closed_deals",
-            "event": "updateClosedDeals",
-            "return_type": "list[models.Deal]",
-            "pydantic_model": "models.DealListTypeAdapter"
-        },
-        {
-            "name": "update_assets",
-            "event": "updateAssets",
-            "return_type": "list[models.UpdateAssetItem]",
-            "pydantic_model": "models.UpdateAssetItemListTypeAdapter"
-        },
-        {
-            "name": "success_close_deal",
-            "event": "successcloseOrder",
-            "return_type": "models.SuccessCloseDealEvent",
-            "pydantic_model": "models.SuccessCloseDealEvent"
-        },
-        {
-            "name": "connect",
-            "event": "connect",
-            "return_type": "None",
-            "pydantic_model": "None"
-        },
-        {
-            "name": "disconnect",
-            "event": "disconnect",
-            "return_type": "None",
-            "pydantic_model": "None"
-        },
-        {
-            "name": "success_auth",
-            "event": "successauth",
-            "return_type": "models.SuccessAuthEvent",
-            "pydantic_model": "models.SuccessAuthEvent"
-        },
-        {
-            "name": "change_market_sentiment",
-            "event": "chafor",
-            "return_type": "list[models.MarketSentimentItem]",
-            "pydantic_model": "models.MarketSentimentItemListTypeAdapter"
-        }
-    ],
-    "emit": [
-        {
-            "name": "ps",
-            "event": "ps"
-        },
-        {
-            "name": "indicator_load",
-            "event": "indicator/load"
-        },
-        {
-            "name": "favorite_load",
-            "event": "favorite/load"
-        },
-        {
-            "name": "price_alert_load",
-            "event": "price-alert/load"
-        },
-        {
-            "name": "auth",
-            "event": "auth",
-            "args": {
-                "name": "data",
-                "type": "models.AuthorizationData"
-            }
-        },
-        {
-            "name": "subscribe_to_asset",
-            "event": "subscribeSymbol",
-            "args": {
-                "name": "asset",
-                "type": "models.Asset"
-            }
-        },
-        {
-            "name": "subscribe_for_market_sentiment",
-            "event": "subfor",
-            "args": {
-                "name": "asset",
-                "type": "models.Asset"
-            }
-        },
-        {
-            "name": "unsubscribe_for_market_sentiment",
-            "event": "unsubfor",
-            "args": {
-                "name": "asset",
-                "type": "models.Asset"
-            }
-        },
-        {
-            "name": "change_asset",
-            "event": "changeSymbol",
-            "args": {
-                "name": "data",
-                "type": "models.ChangeAssetRequest"
-            }
-        },
-        {
-            "name": "open_deal",
-            "event": "openOrder",
-            "args": {
-                "name": "data",
-                "type": "models.OpenDealRequest"
-            }
-        },
-        {
-            "name": "copy_signal",
-            "event": "copySignalOrder",
-            "args": {
-                "name": "data",
-                "type": "models.CopySignalRequest"
-            }
-        }
-    ]
+  "on": [
+    {
+      "name": "update_balance",
+      "doc": "Triggered when account balance information is updated.",
+      "event": "successupdateBalance",
+      "return_type": "models.SuccessUpdateBalanceEvent",
+      "pydantic_model": "models.SuccessUpdateBalanceEvent"
+    },
+    {
+      "name": "update_history_new_fast",
+      "doc": "Triggered when fast historical market data is received.",
+      "event": "updateHistoryNewFast",
+      "return_type": "models.UpdateHistoryFastEvent",
+      "pydantic_model": "models.UpdateHistoryFastEvent"
+    },
+    {
+      "name": "update_close_value",
+      "doc": "Triggered when real-time price stream values are updated.",
+      "event": "updateStream",
+      "return_type": "list[models.UpdateCloseValueItem]",
+      "pydantic_model": "models.UpdateCloseValueListTypeAdapter"
+    },
+    {
+      "name": "update_opened_deals",
+      "doc": "Triggered when the list of opened deals is updated.",
+      "event": "updateOpenedDeals",
+      "return_type": "list[models.Deal]",
+      "pydantic_model": "models.DealListTypeAdapter"
+    },
+    {
+      "name": "success_open_deal",
+      "doc": "Triggered after a new deal is successfully opened.",
+      "event": "successopenOrder",
+      "return_type": "models.Deal",
+      "pydantic_model": "models.Deal"
+    },
+    {
+      "name": "update_closed_deals",
+      "doc": "Triggered when closed deals information is updated.",
+      "event": "updateClosedDeals",
+      "return_type": "list[models.Deal]",
+      "pydantic_model": "models.DealListTypeAdapter"
+    },
+    {
+      "name": "update_assets",
+      "doc": "Triggered when available trading assets metadata is updated.",
+      "event": "updateAssets",
+      "return_type": "list[models.UpdateAssetItem]",
+      "pydantic_model": "models.UpdateAssetItemListTypeAdapter"
+    },
+    {
+      "name": "success_close_deal",
+      "doc": "Triggered after one or more deals are successfully closed.",
+      "event": "successcloseOrder",
+      "return_type": "models.SuccessCloseDealEvent",
+      "pydantic_model": "models.SuccessCloseDealEvent"
+    },
+    {
+      "name": "connect",
+      "doc": "Triggered when the Socket.IO connection is established.",
+      "event": "connect",
+      "return_type": "None",
+      "pydantic_model": "None"
+    },
+    {
+      "name": "disconnect",
+      "doc": "Triggered when the Socket.IO connection is closed.",
+      "event": "disconnect",
+      "return_type": "None",
+      "pydantic_model": "None"
+    },
+    {
+      "name": "success_auth",
+      "doc": "Triggered after successful account authorization.",
+      "event": "successauth",
+      "return_type": "models.SuccessAuthEvent",
+      "pydantic_model": "models.SuccessAuthEvent"
+    },
+    {
+      "name": "change_market_sentiment",
+      "doc": "Triggered when market sentiment data is updated.",
+      "event": "chafor",
+      "return_type": "list[models.MarketSentimentItem]",
+      "pydantic_model": "models.MarketSentimentItemListTypeAdapter"
+    }
+  ],
+  "emit": [
+    {
+      "name": "ps",
+      "doc": "Sends a heartbeat request to keep the connection alive.",
+      "event": "ps"
+    },
+    {
+      "name": "indicator_load",
+      "doc": "Indicates that indicator data has been loaded by the platform.",
+      "event": "indicator/load"
+    },
+    {
+      "name": "favorite_load",
+      "doc": "Indicates that favorite has been loaded by the platform.",
+      "event": "favorite/load"
+    },
+    {
+      "name": "price_alert_load",
+      "doc": "Indicates that price alert data has been loaded by the platform.",
+      "event": "price-alert/load"
+    },
+    {
+      "name": "auth",
+      "doc": "Authorizes the client session.",
+      "event": "auth",
+      "args": {
+        "name": "data",
+        "type": "models.AuthorizationData",
+        "doc": "Authorization payload containing session and account information."
+      }
+    },
+    {
+      "name": "subscribe_to_asset",
+      "doc": "Subscribes to real-time updates for a trading asset.",
+      "event": "subscribeSymbol",
+      "args": {
+        "name": "asset",
+        "type": "models.Asset",
+        "doc": "Trading asset to subscribe."
+      }
+    },
+    {
+      "name": "subscribe_for_market_sentiment",
+      "doc": "Subscribes to market sentiment updates for an asset.",
+      "event": "subfor",
+      "args": {
+        "name": "asset",
+        "type": "models.Asset",
+        "doc": "Trading asset for sentiment tracking."
+      }
+    },
+    {
+      "name": "unsubscribe_for_market_sentiment",
+      "doc": "Removes market sentiment subscription for an asset.",
+      "event": "unsubfor",
+      "args": {
+        "name": "asset",
+        "type": "models.Asset",
+        "doc": "Trading asset to remove from sentiment tracking."
+      }
+    },
+    {
+      "name": "change_asset",
+      "doc": "Changes the active trading asset and timeframe.",
+      "event": "changeSymbol",
+      "args": {
+        "name": "data",
+        "type": "models.ChangeAssetRequest",
+        "doc": "Asset change request parameters."
+      }
+    },
+    {
+      "name": "open_deal",
+      "doc": "Creates a new trading deal.",
+      "event": "openOrder",
+      "args": {
+        "name": "data",
+        "type": "models.OpenDealRequest",
+        "doc": "Deal opening parameters."
+      }
+    },
+    {
+      "name": "copy_signal",
+      "doc": "Creates a deal from a copy trading signal.",
+      "event": "copySignalOrder",
+      "args": {
+        "name": "data",
+        "type": "models.CopySignalRequest",
+        "doc": "Copy signal execution parameters."
+      }
+    }
+  ]
 }

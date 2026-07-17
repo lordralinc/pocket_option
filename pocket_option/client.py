@@ -1,23 +1,26 @@
+from __future__ import annotations
+
 import asyncio
-import collections.abc
 import functools
 import logging
 import typing
 from inspect import isclass
 
-import aiohttp
 import pydantic
 import socketio
 
 from pocket_option.constants import DEFAULT_ORIGIN, DEFAULT_USER_AGENT
-from pocket_option.middleware import Middleware
 from pocket_option.middlewares import FixTypesOnMiddleware, MakeJsonOnMiddleware
-from pocket_option.types import JsonValue
 from pocket_option.utils import get_function_full_name, get_json_function
 
 if typing.TYPE_CHECKING:
+    import collections.abc
+
+    import aiohttp
+
     from pocket_option import models
-    from pocket_option.types import EmitCallback, JsonFunction, SIOEventListener
+    from pocket_option.middleware import Middleware
+    from pocket_option.types import EmitCallback, JsonFunction, JsonValue, SIOEventListener
 
 __all__ = ("BasePocketOptionClient",)
 
@@ -29,9 +32,57 @@ class _Handler[T](typing.TypedDict):
 
 
 class BasePocketOptionClient:
+    """
+    Base asynchronous Socket.IO client for PocketOption API.
+
+    Provides low-level communication layer with PocketOption server.
+
+    The client is responsible for:
+
+        - establishing WebSocket connection;
+        - managing Socket.IO events;
+        - applying incoming and outgoing middlewares;
+        - serializing and deserializing JSON payloads;
+        - registering typed event handlers;
+        - sending and receiving API messages.
+
+    Event flow:
+
+        Socket.IO event
+              |
+              v
+        middleware chain
+              |
+              v
+        data validation
+              |
+              v
+        user callback
+
+
+    Middleware flow:
+
+        send()
+          |
+          v
+        emit middlewares
+          |
+          v
+        Socket.IO
+
+
+    The class is intended to be extended by higher-level clients
+    implementing PocketOption-specific API methods.
+
+    :ivar authorization_data:  Current authorization information.
+    :type authorization_data: models.AuthorizationData | None
+    """
+
+    authorization_data: models.AuthorizationData | None
+
     def __init__(
         self,
-        middlewares: "list[Middleware] | None" = None,
+        middlewares: list[Middleware] | None = None,
         *,
         reconnection: bool = True,
         reconnection_attempts: int = 0,
@@ -40,7 +91,7 @@ class BasePocketOptionClient:
         randomization_factor: float = 0.5,
         logger: bool | logging.Logger = False,
         engineio_logger: bool = False,
-        json: "JsonFunction | None" = None,
+        json: JsonFunction | None = None,
         handle_sigint: bool = True,
         request_timeout: float = 5,
         http_session: aiohttp.ClientSession | None = None,
@@ -119,7 +170,7 @@ class BasePocketOptionClient:
             Whether to append a timestamp to each request for caching avoidance.
             Defaults to `False`.
         """
-        self.authorization_data: "models.AuthorizationData | None" = None
+        self.authorization_data = None
         self.middlewares = middlewares or [MakeJsonOnMiddleware(), FixTypesOnMiddleware()]
         self.json = json or get_json_function()
         self.sio = socketio.AsyncClient(
@@ -156,12 +207,20 @@ class BasePocketOptionClient:
         else:
             self.logger = logging.getLogger("pocket_option.client")
 
-    def get_auth_from_packet(self, packet: str) -> "models.AuthorizationData":
+    def get_auth_from_packet(self, packet: str) -> models.AuthorizationData:
         packet = packet.removeprefix("42")
         json_packet = self.json.loads(packet)
         return typing.cast("models.AuthorizationData", json_packet)
 
     def add_middleware(self, middleware: Middleware) -> None:
+        """
+        Add middleware to client pipeline.
+
+        Middleware is executed for every incoming and outgoing event.
+
+        :param middleware: Middleware instance.
+        :type middleware: Middleware
+        """
         self.middlewares.append(middleware)
 
     async def _get_real_value[T](
@@ -196,15 +255,46 @@ class BasePocketOptionClient:
         self,
         url: str,
         headers: dict[str, str] | collections.abc.Callable[[], dict[str, str]] | None = None,
-        auth: "models.AuthorizationData | None" = None,
+        auth: models.AuthorizationData | None = None,
         wait: bool = True,
         wait_timeout: float = 1,
         retry: bool = False,
     ):
+        """
+        Connect to PocketOption Socket.IO server.
+
+        The method establishes websocket connection and configures
+        default PocketOption headers.
+
+        Headers:
+            - Origin
+            - User-Agent
+
+
+        :param url: Socket.IO server URL.
+        :type url:  str
+
+        :param headers:
+            Additional HTTP headers.
+            Can be a static dictionary or callable returning headers.
+        :type headers: dict[str, str] | collections.abc.Callable[[], dict[str, str]] | None
+
+        :param auth: Socket.IO authentication payload.
+        :type auth:  models.AuthorizationData | None
+
+        :param wait: Wait until connection is established.
+        :type wait: bool
+
+        :param wait_timeout: Connection timeout.
+        :type wait_timeout: float
+
+        :param retry: Retry connection on failure.
+        :type retry: bool
+        """
         headers = await self._get_real_value(headers) or {}
         headers.setdefault("Origin", DEFAULT_ORIGIN)
         headers.setdefault("User-Agent", DEFAULT_USER_AGENT)
-        return await self.sio.connect(
+        await self.sio.connect(
             url,
             headers=headers,
             auth=auth,
@@ -219,17 +309,17 @@ class BasePocketOptionClient:
     async def handle_new_event(
         self,
         event_name: str,
-        data: "bytes | None" = None,
-    ) -> "JsonValue | None":
+        data: bytes | None = None,
+    ) -> JsonValue | None:
         return await self._handle_event(event_name, data)
 
     async def handle_connect_event(self) -> None:
         await self._handle_event("connect")
 
     async def handle_disconnect_event(self) -> None:
-        await self._handle_event("connect")
+        await self._handle_event("disconnect")
 
-    async def _handle_event(self, event_name: str, data: bytes | None = None) -> "JsonValue | None":
+    async def _handle_event(self, event_name: str, data: bytes | None = None) -> JsonValue | None:
         results = []
         self.logger.debug("New event '%s' with data %r", event_name, data)
         for handler in filter(lambda x: x["name"] == event_name, self.handlers):
@@ -260,12 +350,12 @@ class BasePocketOptionClient:
         handler: None = ...,
         *,
         model: type[pydantic.BaseModel] | pydantic.TypeAdapter | None = ...,
-    ) -> "typing.Callable[[SIOEventListener], None]": ...
+    ) -> typing.Callable[[SIOEventListener], None]: ...
     @typing.overload
     def add_on(
         self,
         event: str,
-        handler: "SIOEventListener",
+        handler: SIOEventListener,
         *,
         model: type[pydantic.BaseModel] | pydantic.TypeAdapter | None = ...,
     ) -> None: ...
@@ -273,11 +363,45 @@ class BasePocketOptionClient:
     def add_on(
         self,
         event: str,
-        handler: "SIOEventListener | None" = None,
+        handler: SIOEventListener | None = None,
         *,
         model: type[pydantic.BaseModel] | pydantic.TypeAdapter | None = None,
-    ) -> "None | typing.Callable[[SIOEventListener], None]":
-        def _get_data(d: "JsonValue | bytes | None"):
+    ) -> None | typing.Callable[[SIOEventListener], None]:
+        """
+        Register Socket.IO event handler.
+
+        Supports:
+
+            - automatic JSON decoding;
+            - middleware processing;
+            - Pydantic model validation;
+            - response serialization.
+
+
+        Example:
+
+            @client.add_on(
+                "success_open_deal",
+                model=Deal,
+            )
+            async def on_deal(deal: Deal):
+                print(deal)
+
+
+        :param event: Socket.IO event name.
+        :type event: str
+
+        :param handler: Event callback.
+        :type handler: SIOEventListener | None
+
+        :param model: Optional Pydantic model used for payload validation.
+        :type model: type[pydantic.BaseModel] | pydantic.TypeAdapter | None
+
+        :return: Decorator when handler is omitted.
+        :rtype: typing.Callable | None
+        """
+
+        def _get_data(d: JsonValue | bytes | None):
             if isinstance(d, bytes):
                 d = self.json.loads(d)
             if d and isinstance(d, dict) and model and isclass(model) and issubclass(model, pydantic.BaseModel):
@@ -295,7 +419,7 @@ class BasePocketOptionClient:
                 return {k: _get_result(it) for k, it in result.items()}
             return result
 
-        def set_handler(_handler: "SIOEventListener"):
+        def set_handler(_handler: SIOEventListener):
             @functools.wraps(_handler)
             async def wrapper(data: JsonValue | bytes | None):
                 if isinstance(data, bytes):
@@ -317,9 +441,28 @@ class BasePocketOptionClient:
     async def send(
         self,
         event: str,
-        data: "JsonValue | pydantic.BaseModel | None" = None,
-        callback: "EmitCallback[JsonValue] | None" = None,
+        data: JsonValue | pydantic.BaseModel | None = None,
+        callback: EmitCallback[JsonValue] | None = None,
     ) -> None:
+        """
+        Emit event to PocketOption server.
+
+        Before sending:
+
+            - Pydantic models are converted to JSON;
+            - middleware chain is executed;
+            - authorization data is stored for auth event.
+
+
+        :param event: Socket.IO event name.
+        :type event: str
+
+        :param data: Event payload.
+        :type data: JsonValue | pydantic.BaseModel | None
+
+        :param callback: Optional Socket.IO callback.
+        :type callback: EmitCallback[JsonValue] | None
+        """
         if event == "auth":
             self.authorization_data = typing.cast("models.AuthorizationData", data)
         if isinstance(data, pydantic.BaseModel):

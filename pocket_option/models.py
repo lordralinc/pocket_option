@@ -1,9 +1,13 @@
-import datetime
+from __future__ import annotations
+
 import enum
 import typing
-import uuid
 
 import pydantic
+
+if typing.TYPE_CHECKING:
+    import datetime
+    import uuid
 
 __all__ = (
     "Asset",
@@ -33,7 +37,7 @@ __all__ = (
 type IsDemo = typing.Literal[0, 1]
 
 
-class Asset(str, enum.Enum):
+class Asset(enum.StrEnum):
     AUDCAD = "AUDCAD"
     EURUSD = "EURUSD"
     GBPUSD = "GBPUSD"
@@ -161,7 +165,7 @@ class Asset(str, enum.Enum):
     def is_otc(self) -> bool:
         return self.endswith("_otc")
 
-    def __new__(cls, value: str) -> "Asset":
+    def __new__(cls, value: str) -> typing.Self:
         for member in cls:
             if member.value == value:
                 return member
@@ -172,7 +176,7 @@ class Asset(str, enum.Enum):
         return obj
 
     @classmethod
-    def _missing_(cls, value: str) -> "Asset":  # type: ignore
+    def _missing_(cls, value: str) -> typing.Self:  # type: ignore
         """
         Create a new Asset instance for unknown values dynamically.
         Does NOT modify class attributes (avoids AttributeError).
@@ -191,7 +195,7 @@ class Asset(str, enum.Enum):
         yield cls.validate
 
     @classmethod
-    def validate(cls, value: typing.Any) -> "Asset":
+    def validate(cls, value: typing.Any) -> typing.Self:
         if isinstance(value, cls):
             return value
         if isinstance(value, str):
@@ -206,12 +210,31 @@ class Asset(str, enum.Enum):
 
 
 class AuthorizationData(pydantic.BaseModel):
+    """
+    PocketOption authorization payload.
+
+    Contains authentication and client configuration data required
+    to establish an authorized API session.
+
+    This model is used during the authentication handshake and is sent
+    to PocketOption server through the ``auth`` Socket.IO event.
+    """
+
     session: str
-    is_demo: typing.Annotated[IsDemo, pydantic.Field(..., alias="isDemo")]
+    is_demo: typing.Annotated[
+        IsDemo,
+        pydantic.Field(..., alias="isDemo"),
+    ]
     uid: int
     platform: int
-    is_fast_history: typing.Annotated[bool, pydantic.Field(..., alias="isFastHistory")]
-    is_optimized: typing.Annotated[bool, pydantic.Field(..., alias="isOptimized")]
+    is_fast_history: typing.Annotated[
+        bool,
+        pydantic.Field(..., alias="isFastHistory"),
+    ]
+    is_optimized: typing.Annotated[
+        bool,
+        pydantic.Field(..., alias="isOptimized"),
+    ]
 
 
 class SuccessAuthEvent(pydantic.BaseModel):
@@ -219,17 +242,71 @@ class SuccessAuthEvent(pydantic.BaseModel):
 
 
 class SuccessUpdateBalanceEvent(pydantic.BaseModel):
+    """
+    Balance update event.
+
+    Represents a successful balance synchronization event received
+    from PocketOption after account balance changes or balance request.
+
+    The event contains the account type and current account balance.
+
+    :ivar is_demo:
+        Account type for which the balance was updated.
+
+    :ivar balance:
+        Current account balance value.
+    """
+
     is_demo: typing.Annotated[IsDemo, pydantic.Field(..., alias="isDemo")]
     balance: float
 
 
 class UpdateHistoryFastEvent(pydantic.BaseModel):
+    """
+    Fast history update event.
+
+    Represents a historical candle data update received from
+    PocketOption using the fast history endpoint.
+
+    The event contains the target asset, requested timeframe and
+    raw historical price data.
+
+    The ``history`` field contains serialized candle information
+    as a list of numeric arrays. The exact array structure depends
+    on PocketOption API response format.
+
+
+    :ivar asset:
+        Trading asset associated with historical data.
+
+    :ivar period:
+        Candle timeframe in seconds.
+
+    :ivar history:
+        Raw historical candle data returned by PocketOption API.
+
+        Each item contains numeric values representing candle data.
+    """
+
     asset: Asset
     period: int
     history: list[list[float]]
 
 
 class UpdateCloseValueItem(pydantic.BaseModel):
+    """
+    Close value update item.
+
+    Represents a single price update received from PocketOption.
+
+    This model is used for real-time price stream updates and contains
+    the asset identifier, event timestamp and current price value.
+
+    :ivar asset: Trading asset associated with the update.
+    :ivar timestamp: Unix timestamp of the price update.
+    :ivar value: Current asset price value.
+    """
+
     asset: Asset
     timestamp: float
     value: float
@@ -249,6 +326,53 @@ class Command(enum.IntEnum):
 
 
 class Deal(pydantic.BaseModel):
+    """
+    Trading deal model.
+
+    Represents a complete PocketOption trading deal.
+
+    The model contains:
+        - deal identification data;
+        - trading parameters;
+        - account information;
+        - opening and closing timestamps;
+        - price information;
+        - profit and loss data;
+        - additional deal metadata.
+
+    A deal is created after successful order execution and is updated
+    when the position is closed.
+
+
+    :ivar id: Unique deal identifier.
+    :ivar command: Trading command/action.
+    :ivar asset: Trading asset.
+    :ivar uid: PocketOption user identifier.
+    :ivar amount: Deal investment amount.
+    :ivar is_demo: Account type.
+    :ivar profit: Deal profit or loss value.
+    :ivar percent_profit: Profit percentage.
+    :ivar percent_loss: Loss percentage.
+    :ivar open_time: Deal opening datetime.
+    :ivar close_time: Deal closing datetime.
+    :ivar open_timestamp: Deal opening Unix timestamp.
+    :ivar close_timestamp: Deal closing Unix timestamp.
+    :ivar refund_time: Refund datetime if applicable.
+    :ivar refund_timestamp: Refund Unix timestamp.
+    :ivar open_price: Price at deal opening.
+    :ivar close_price: Price at deal closing.
+    :ivar copy_ticket: Copy trading ticket identifier.
+    :ivar open_ms: Opening timestamp in milliseconds.
+    :ivar close_ms: Closing timestamp in milliseconds.
+    :ivar option_type: PocketOption option type identifier.
+    :ivar is_rollover: Indicates rollover operation.
+    :ivar is_copy_signal: Indicates deal created from copy signal.
+    :ivar is_ai: Indicates AI-generated deal.
+    :ivar currency: Deal currency.
+    :ivar amount_usd: Deal amount converted to USD.
+    :ivar request_id: Client request identifier used when opening the deal.
+    """
+
     id: uuid.UUID
     command: Command
     asset: Asset
@@ -292,6 +416,34 @@ class DealAction(enum.StrEnum):
 
 
 class OpenDealRequest(pydantic.BaseModel):
+    """
+    Request model for opening a new trading deal.
+
+    Contains parameters required to create a new order through
+    the PocketOption API.
+
+    :ivar asset:
+        Trading asset for the deal.
+
+    :ivar amount:
+        Investment amount.
+
+    :ivar action:
+        Trading action direction.
+
+    :ivar is_demo:
+        Account type used for the deal.
+
+    :ivar request_id:
+        Unique client request identifier.
+
+    :ivar option_type:
+        Deal option type identifier.
+
+    :ivar time:
+        Deal duration in seconds.
+    """
+
     model_config = pydantic.ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     asset: Asset
@@ -304,6 +456,40 @@ class OpenDealRequest(pydantic.BaseModel):
 
 
 class CopySignalRequest(pydantic.BaseModel):
+    """
+    Request model for copy trading signal execution.
+
+    Contains signal metadata and trading parameters required
+    to replicate a trading action.
+
+    :ivar symbol:
+        Trading asset associated with the signal.
+
+    :ivar amount:
+        Investment amount.
+
+    :ivar expired_at:
+        Signal expiration timestamp.
+
+    :ivar action:
+        Trading action direction.
+
+    :ivar is_demo:
+        Account type used for execution.
+
+    :ivar request_id:
+        Client request identifier.
+
+    :ivar created_at:
+        Signal creation timestamp.
+
+    :ivar timeframe:
+        Signal timeframe.
+
+    :ivar signal_id:
+        Identifier of the source signal.
+    """
+
     symbol: Asset
     amount: int
     expired_at: typing.Annotated[int, pydantic.Field(..., alias="expiredAt")]
@@ -316,6 +502,36 @@ class CopySignalRequest(pydantic.BaseModel):
 
 
 class OpenPendingDealRequest(pydantic.BaseModel):
+    """
+    Request model for creating a pending trading deal.
+
+    Defines conditions required for delayed order execution.
+
+    :ivar open_type:
+        Pending order opening mode.
+
+    :ivar amount:
+        Investment amount.
+
+    :ivar asset:
+        Trading asset.
+
+    :ivar open_time:
+        Target opening time.
+
+    :ivar open_price:
+        Target opening price.
+
+    :ivar timeframe:
+        Deal duration timeframe.
+
+    :ivar min_payout:
+        Minimum required payout.
+
+    :ivar command:
+        Trading command.
+    """
+
     open_type: typing.Annotated[OpenPendingDealRequestOpenType, pydantic.Field(..., alias="openType")]
     amount: int
     asset: Asset
@@ -327,6 +543,16 @@ class OpenPendingDealRequest(pydantic.BaseModel):
 
 
 class ChangeAssetRequest(pydantic.BaseModel):
+    """
+    Request model for changing active trading asset subscription.
+
+    :ivar asset:
+        Trading asset to subscribe.
+
+    :ivar period:
+        Market update period.
+    """
+
     asset: Asset
     period: int
 
@@ -337,6 +563,12 @@ class SuccessCloseDealEvent(pydantic.BaseModel):
 
 
 class AssetType(enum.StrEnum):
+    """
+    Trading asset category.
+
+    Defines a group of supported financial instruments.
+    """
+
     STOCK = "stock"
     COMMODITY = "commodity"
     CURRENCY = "currency"
@@ -345,10 +577,81 @@ class AssetType(enum.StrEnum):
 
 
 class AssetItemTimeframe(pydantic.BaseModel):
+    """
+    Asset timeframe configuration.
+
+    :ivar time:
+        Available timeframe value.
+    """
+
     time: int
 
 
 class UpdateAssetItem(pydantic.BaseModel):
+    """
+    Asset metadata update model.
+
+    Contains trading asset configuration, availability state,
+    payout information and supported timeframes.
+
+    :ivar id:
+        Internal asset identifier.
+
+    :ivar asset:
+        Trading asset symbol.
+
+    :ivar label:
+        Human-readable asset name.
+
+    :ivar type:
+        Asset category.
+
+    :ivar precision:
+        Price precision.
+
+    :ivar payout:
+        Current payout percentage.
+
+    :ivar min_duration:
+        Minimum supported duration.
+
+    :ivar max_duration:
+        Maximum supported duration.
+
+    :ivar step_duration:
+        Duration increment step.
+
+    :ivar volatility_index:
+        Asset volatility indicator.
+
+    :ivar spread:
+        Current spread value.
+
+    :ivar leverage:
+        Available leverage.
+
+    :ivar extra_data:
+        Additional asset metadata.
+
+    :ivar expire_time:
+        Expiration time.
+
+    :ivar is_active:
+        Indicates whether the asset is available.
+
+    :ivar timeframes:
+        Supported trading timeframes.
+
+    :ivar start_time:
+        Asset availability start timestamp.
+
+    :ivar default_timeframe:
+        Default timeframe used by the platform.
+
+    :ivar status_code:
+        Current asset status code.
+    """
+
     id: int
     asset: typing.Annotated[Asset, pydantic.Field(..., alias="symbol")]
     label: str
@@ -374,6 +677,16 @@ UpdateAssetItemListTypeAdapter = pydantic.TypeAdapter(list[UpdateAssetItem])
 
 
 class MarketSentimentItem(pydantic.BaseModel):
+    """
+    Market sentiment data model.
+
+    :ivar asset:
+        Trading asset.
+
+    :ivar value:
+        Sentiment value.
+    """
+
     asset: Asset
     value: int
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import typing
 
@@ -14,25 +16,25 @@ __all__ = (
 
 
 UPDATE_ITEMS_NAMES = [
-    "id",  # ID актива
-    "symbol",  # Символ (#AAPL)
-    "label",  # Название (Apple)
-    "type",  # Тип (stock, forex, crypto и т.д.)
-    "precision",  # Кол-во знаков после запятой
-    "payout",  # Выплата (%)
-    "min_duration",  # Мин. длительность сделки
-    "max_duration",  # Макс. длительность сделки
-    "step_duration",  # Шаг длительности
-    "volatility_index",  # Индекс волатильности / флаг
-    "spread",  # Спред / коэффициент
-    "leverage",  # Плечо
-    "extra_data",  # Доп. данные (список или null)
-    "expire_time",  # Метка времени окончания (timestamp)
-    "is_active",  # Активен ли актив
-    "timeframes",  # Список доступных таймфреймов [{time: 60}, ...]
-    "start_time",  # Время старта (timestamp)
-    "default_timeframe",  # Таймфрейм по умолчанию
-    "status_code",  # Статус / код состояния
+    "id",
+    "symbol",
+    "label",
+    "type",
+    "precision",
+    "payout",
+    "min_duration",
+    "max_duration",
+    "step_duration",
+    "volatility_index",
+    "spread",
+    "leverage",
+    "extra_data",
+    "expire_time",
+    "is_active",
+    "timeframes",
+    "start_time",
+    "default_timeframe",
+    "status_code",
 ]
 
 
@@ -40,7 +42,7 @@ class MakeJsonOnMiddleware(Middleware):
     def __init__(self) -> None:
         self.json = get_json_function()
 
-    async def on(self, event: str, data: "str | bytes | JsonValue | None") -> "JsonValue | None":  # noqa: ARG002
+    async def on(self, event: str, data: str | bytes | JsonValue | None) -> JsonValue | None:  # noqa: ARG002
         if isinstance(data, str | bytes):
             with contextlib.suppress(Exception):
                 return self.json.loads(data)
@@ -48,7 +50,7 @@ class MakeJsonOnMiddleware(Middleware):
 
 
 class FixTypesOnMiddleware(Middleware):
-    async def on(self, event: str, data: "JsonValue | None") -> "JsonValue | None":  # type: ignore
+    async def on(self, event: str, data: JsonValue | None) -> JsonValue | None:  # type: ignore
         if data is None:
             return None
         if event == "updateStream":

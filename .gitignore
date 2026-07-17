@@ -61,3 +61,5 @@ cython_debug/
 .ruff_cache/
 .pypirc
 reverse/
+
+run.py

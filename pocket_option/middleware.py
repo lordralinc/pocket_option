@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:
@@ -10,10 +12,10 @@ class Middleware:
     async def emit(
         self,
         event: str,
-        data: "JsonValue | None" = None,
-        callback: "EmitCallback[JsonValue] | None" = None,
-    ) -> "tuple[str, JsonValue | None, EmitCallback[JsonValue] | None]":
+        data: JsonValue | None = None,
+        callback: EmitCallback[JsonValue] | None = None,
+    ) -> tuple[str, JsonValue | None, EmitCallback[JsonValue] | None]:
         return event, data, callback
 
-    async def on(self, event: str, data: "str | bytes | JsonValue | None") -> "JsonValue | None":  # noqa: ARG002
+    async def on(self, event: str, data: str | bytes | JsonValue | None) -> JsonValue | None:  # noqa: ARG002
         return data  # type: ignore

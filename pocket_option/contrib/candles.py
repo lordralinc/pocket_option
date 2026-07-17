@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import collections.abc
 import datetime
@@ -29,7 +31,29 @@ class Candle(pydantic.BaseModel):
 
 
 class CandleStorage(abc.ABC):
-    def __init__(self, client: "PocketOptionClient") -> None:
+    """
+    Abstract candle storage.
+
+    CandleStorage stores raw price updates and provides OHLC candle
+    aggregation.
+
+    The storage subscribes to PocketOption close value updates and converts
+    incoming price events into stored items.
+
+    Raw price updates are represented by UpdateCloseValueItem.
+    Candles are generated dynamically using timeframe buckets.
+
+    Example:
+
+        candles = await storage.get_candles(
+            Asset.AUDCAD_otc,
+            timeframe=60,
+            count=100,
+        )
+
+    """
+
+    def __init__(self, client: PocketOptionClient) -> None:
         self.client = client
 
         self.client.on.update_close_value(self._on_update_close_value)
@@ -38,6 +62,19 @@ class CandleStorage(abc.ABC):
         await self.add_item_bulk(items)
 
     async def add_candle(self, candle: Candle) -> None:
+        """
+        Add complete candle into storage.
+
+        The candle is converted into synthetic price updates:
+
+        - open  -> timestamp + 0.00
+        - low   -> timestamp + 0.01
+        - high  -> timestamp + 0.02
+        - close -> timestamp + timeframe - 0.01
+
+        This allows candle reconstruction through the same aggregation
+        mechanism used for live market data.
+        """
         await self.add_item_bulk(
             [
                 UpdateCloseValueItem(asset=candle.asset, timestamp=candle.timestamp.timestamp(), value=candle.open),
@@ -60,9 +97,21 @@ class CandleStorage(abc.ABC):
         )
 
     @abc.abstractmethod
-    async def add_item(self, item: UpdateCloseValueItem): ...
+    async def add_item(self, item: UpdateCloseValueItem):
+        """
+        Store a single price update.
+
+        Must be implemented by subclasses.
+        """
+
     @abc.abstractmethod
-    async def add_item_bulk(self, items: list[UpdateCloseValueItem]): ...
+    async def add_item_bulk(self, items: list[UpdateCloseValueItem]):
+        """
+        Store multiple price updates.
+
+        Must be implemented by subclasses.
+        """
+
     @abc.abstractmethod
     async def get_items(
         self,
@@ -71,7 +120,25 @@ class CandleStorage(abc.ABC):
         start: datetime.datetime | None = None,
         end: datetime.datetime | None = None,
         count: int | None = None,
-    ) -> collections.abc.Iterable[UpdateCloseValueItem]: ...
+    ) -> collections.abc.Iterable[UpdateCloseValueItem]:
+        """
+        Retrieve raw price updates.
+
+        :param asset: Asset to query.
+        :type asset: Asset
+
+        :param start: Minimum timestamp filter.
+        :type start: datetime.datetime | None
+
+        :param end: Maximum timestamp filter.
+        :type end: datetime.datetime | None
+
+        :param count: Maximum number of latest items.
+        :type count: int | None
+
+        :return: Iterable of price updates ordered by timestamp.
+        :rtype: collections.abc.Iterable[UpdateCloseValueItem]
+        """
 
     async def get_candles(
         self,
@@ -82,6 +149,39 @@ class CandleStorage(abc.ABC):
         end: datetime.datetime | None = None,
         count: int | None = None,
     ) -> collections.abc.Iterable[Candle]:
+        """
+        Build OHLC candles from stored price updates.
+
+        Price updates are grouped into timeframe buckets:
+
+            bucket = floor(timestamp / timeframe) * timeframe
+
+        For each bucket:
+
+            open  = first price
+            close = last price
+            high  = maximum price
+            low   = minimum price
+
+
+        :param asset: Asset to build candles for.
+        :type asset: Asset
+
+        :param timeframe: Candle size in seconds.
+        :type timeframe: int
+
+        :param start: Start datetime filter.
+        :type start: datetime.datetime | None
+
+        :param end: End datetime filter.
+        :type end: datetime.datetime | None
+
+        :param count: Number of latest candles.
+        :type count: int | None
+
+        :return: Iterable of generated candles.
+        :rtype: collections.abc.Iterable[Candle]
+        """
         items = await self.get_items(asset, start=start, end=end, count=count)
 
         buckets: dict[int, list[UpdateCloseValueItem]] = defaultdict(list)
@@ -108,13 +208,42 @@ class CandleStorage(abc.ABC):
 
 
 class MemoryCandleStorage(CandleStorage):
-    def __init__(self, client: "PocketOptionClient") -> None:
+    """
+    In-memory candle storage.
+
+    Stores raw price updates in memory using bounded deques.
+
+    Features:
+        - separate storage per asset;
+        - automatic replacement of duplicate timestamps;
+        - configurable maximum history size.
+
+    Data is lost after process restart.
+
+    Example:
+
+        storage = MemoryCandleStorage(client)
+        ...
+        candles = await storage.get_candles(
+            Asset.AUDCAD_otc,
+            timeframe=60,
+        )
+    """
+
+    def __init__(self, client: PocketOptionClient) -> None:
         super().__init__(client)
         self._max_len = 10_000
-        self._storage: dict[Asset, deque[UpdateCloseValueItem]] = defaultdict(lambda: deque([], 10_000))
+        self._storage: dict[Asset, deque[UpdateCloseValueItem]] = defaultdict(lambda: deque(maxlen=10_000))
 
     def set_max_len(self, _max_len: int):
-        self._storage = defaultdict(lambda: deque([], _max_len))
+        """
+        Change maximum number of stored price updates per asset.
+
+
+        :param max_len: Maximum deque size.
+        :type max_len: int
+        """
+        self._storage = defaultdict(lambda: deque(maxlen=_max_len))
 
     async def add_item(self, item: UpdateCloseValueItem):
         self._storage[item.asset] = append_or_replace(self._storage[item.asset], item, ["asset", "timestamp"])

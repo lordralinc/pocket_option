@@ -1,12 +1,11 @@
+from __future__ import annotations
+
 import abc
 import asyncio
-import collections.abc
 import contextlib
-import datetime
 import itertools
 import logging
 import typing
-import uuid
 
 from pocket_option.constants import (
     API_LIMITS_MAX_CONCURRENT_ORDERS,
@@ -18,9 +17,12 @@ from pocket_option.constants import (
 from pocket_option.errors import DealError
 from pocket_option.generated_client import PocketOptionClient
 from pocket_option.models import Asset, Deal, DealAction, IsDemo, OpenDealRequest, SuccessCloseDealEvent
-from pocket_option.utils import append_or_replace, generate_request_id
+from pocket_option.utils import Q, append_or_replace, generate_request_id
 
 if typing.TYPE_CHECKING:
+    import collections.abc
+    import uuid
+
     from pocket_option.generated_client import PocketOptionClient
 
 __all__ = ("DealsStorage", "MemoryDealsStorage")
@@ -29,7 +31,48 @@ logger = logging.getLogger("pocket_option.deals")
 
 
 class DealsStorage:
-    def __init__(self, client: "PocketOptionClient") -> None:
+    """
+    Abstract storage and manager for trading deals.
+
+    DealsStorage provides a high-level interface for:
+
+    - opening new deals;
+    - waiting for deal execution confirmation;
+    - waiting for deal closing;
+    - storing and querying deal history.
+
+    The storage subscribes to PocketOption events:
+
+        success_open_deal
+            -> saves newly opened deals
+
+        success_close_deal
+            -> updates closed deals
+
+        update_opened_deals
+            -> synchronizes active deals
+
+        update_closed_deals
+            -> synchronizes completed deals
+
+    Concrete storage implementations must provide persistence logic.
+
+    Examples:
+        storage = MemoryDealsStorage(client)
+
+        deal = await storage.open_deal(
+            asset=Asset.AUDCAD_otc,
+            amount=10,
+            action=DealAction.CALL,
+            time=60,
+        )
+
+        result = await storage.check_deal_result(
+            deal=deal,
+        )
+    """
+
+    def __init__(self, client: PocketOptionClient) -> None:
         self.client = client
 
         self._open_deal_events: dict[int, asyncio.Event] = {}
@@ -52,6 +95,47 @@ class DealsStorage:
         *,
         check_limits: bool = True,
     ) -> Deal:
+        """
+        Open a new trading deal.
+
+        Sends an order request to PocketOption and waits until the server
+        confirms deal creation.
+
+        Validation is performed before sending:
+
+        - order amount limits;
+        - expiration duration limits;
+        - concurrent opened deals limit.
+
+        :param asset: Trading asset
+        :type asset: Asset
+
+        :param amount: Deal amount
+        :type amount: int
+
+        :param action: Deal direction
+        :type action: DealAction
+
+        :param time: Deal duration in seconds
+        :type time: int
+
+        :param is_demo: Use demo account
+        :type is_demo: IsDemo
+
+        :param request_id: Custom request id
+        :type request_id: int | None
+
+        :param option_type: Option type
+        :type option_type: int
+
+        :param check_limits: Check API limits before opening
+        :type check_limits: bool
+
+        :raises DealError: If deal cannot be opened
+
+        :return: Opened deal
+        :rtype: Deal
+        """
         if check_limits:
             if amount < API_LIMITS_MIN_ORDER_AMOUNT:
                 raise DealError(
@@ -92,7 +176,9 @@ class DealsStorage:
             if not self.client.authorization_data:
                 self.client.logger.warning("Failed to check concurent orders: no authorization data")
             if self.client.authorization_data:
-                orders = await self.get_deals(uid=self.client.authorization_data.uid, closed=False)
+                orders = await self.get_deals(
+                    query=Q.field("uid", "eq", self.client.authorization_data.uid) & Q.field("closed", "eq", False),
+                )
                 if len(list(orders)) > API_LIMITS_MAX_CONCURRENT_ORDERS:
                     raise DealError(
                         "max_orders",
@@ -169,6 +255,26 @@ class DealsStorage:
         request_id: int | None = None,
         deal: Deal | None = None,
     ) -> Deal:
+        """
+        Wait for deal closing.
+
+        :param wait_time: Maximum wait time in seconds
+        :type wait_time: int
+
+        :param deal_id: Deal identifier
+        :type deal_id: uuid.UUID | None
+
+        :param request_id: Deal request identifier
+        :type request_id: int | None
+
+        :param deal: Existing deal object
+        :type deal: Deal | None
+
+        :raises TimeoutError: If waiting timeout exceeded
+
+        :return: Closed deal
+        :rtype: Deal
+        """
         if not deal and (deal_id or request_id):
             deal = await self.get_deal(deal_id=deal_id, request_id=request_id)  # type: ignore
         if not deal:
@@ -220,37 +326,64 @@ class DealsStorage:
         *,
         deal_id: uuid.UUID | None = None,
         request_id: int | None = None,
-    ) -> Deal | None: ...
+    ) -> Deal | None:
+        """
+        Get deal by identifier.
+
+        :param deal_id: Deal UUID
+        :type deal_id: uuid.UUID | None
+
+        :param request_id: Open request identifier
+        :type request_id: int | None
+
+        :return: Deal or None
+        :rtype: Deal | None
+        """
 
     @abc.abstractmethod
     async def get_deals(
         self,
         *,
-        asset: Asset | None = None,
-        uid: int | None = None,
-        open_time__gt: datetime.datetime | None = None,
-        open_time__gte: datetime.datetime | None = None,
-        open_time__lt: datetime.datetime | None = None,
-        open_time__lte: datetime.datetime | None = None,
-        close_time__gt: datetime.datetime | None = None,
-        close_time__gte: datetime.datetime | None = None,
-        close_time__lt: datetime.datetime | None = None,
-        close_time__lte: datetime.datetime | None = None,
-        open_price__gt: float | None = None,
-        open_price__gte: float | None = None,
-        open_price__lt: float | None = None,
-        open_price__lte: float | None = None,
-        close_price__gt: float | None = None,
-        close_price__gte: float | None = None,
-        close_price__lt: float | None = None,
-        close_price__lte: float | None = None,
+        query: Q,
         count: int | None = None,
-        closed: bool | None = None,
-    ) -> collections.abc.Iterable[Deal]: ...
+    ) -> collections.abc.Iterable[Deal]:
+        """
+        Query stored deals using Q expressions.
+
+        Filtering is delegated to Q objects, allowing composition
+        of complex queries.
+
+        Example:
+
+            query = (
+                Q.field("asset", "eq", Asset.AUDCAD_otc)
+                &
+                Q.field("closed", "eq", False)
+            )
+
+            deals = await storage.get_deals(
+                query=query
+            )
+
+        :param query: Deal filter expression
+        :type query: Q
+
+        :param count: Maximum number of returned deals
+        :type count: int | None
+
+        :return: Iterable of deals
+        :rtype: collections.abc.Iterable[Deal]
+        """
 
 
 class MemoryDealsStorage(DealsStorage):
-    def __init__(self, client: "PocketOptionClient") -> None:
+    """
+    In-memory deals storage.
+
+    Stores deals in process memory.
+    """
+
+    def __init__(self, client: PocketOptionClient) -> None:
         super().__init__(client)
         self._deals: list[Deal] = []
 
@@ -274,74 +407,13 @@ class MemoryDealsStorage(DealsStorage):
     async def get_deals(
         self,
         *,
-        asset: Asset | None = None,
-        uid: int | None = None,
-        open_time__gt: datetime.datetime | None = None,
-        open_time__gte: datetime.datetime | None = None,
-        open_time__lt: datetime.datetime | None = None,
-        open_time__lte: datetime.datetime | None = None,
-        close_time__gt: datetime.datetime | None = None,
-        close_time__gte: datetime.datetime | None = None,
-        close_time__lt: datetime.datetime | None = None,
-        close_time__lte: datetime.datetime | None = None,
-        open_price__gt: float | None = None,
-        open_price__gte: float | None = None,
-        open_price__lt: float | None = None,
-        open_price__lte: float | None = None,
-        close_price__gt: float | None = None,
-        close_price__gte: float | None = None,
-        close_price__lt: float | None = None,
-        close_price__lte: float | None = None,
+        query: Q | None = None,
         count: int | None = None,
-        closed: bool | None = None,
     ) -> collections.abc.Iterable[Deal]:
-        def _convert_dt(dt: datetime.datetime) -> float:
-            return dt.timestamp()
-
         data = self._deals.copy()
 
-        if asset:
-            data = filter(lambda it: it.asset == asset, data)
-        if uid:
-            data = filter(lambda it: it.uid == uid, data)
-        if open_time__gt:
-            data = filter(lambda it: _convert_dt(it.open_time) > _convert_dt(open_time__gt), data)
-        if open_time__gte:
-            data = filter(lambda it: _convert_dt(it.open_time) >= _convert_dt(open_time__gte), data)
-        if open_time__lt:
-            data = filter(lambda it: _convert_dt(it.open_time) < _convert_dt(open_time__lt), data)
-        if open_time__lte:
-            data = filter(lambda it: _convert_dt(it.open_time) <= _convert_dt(open_time__lte), data)
-        if close_time__gt:
-            data = filter(lambda it: _convert_dt(it.close_time) > _convert_dt(close_time__gt), data)
-        if close_time__gte:
-            data = filter(lambda it: _convert_dt(it.close_time) >= _convert_dt(close_time__gte), data)
-        if close_time__lt:
-            data = filter(lambda it: _convert_dt(it.close_time) < _convert_dt(close_time__lt), data)
-        if close_time__lte:
-            data = filter(lambda it: _convert_dt(it.close_time) <= _convert_dt(close_time__lte), data)
-
-        if open_price__gt:
-            data = filter(lambda it: it.open_price > open_price__gt, data)
-        if open_price__gte:
-            data = filter(lambda it: it.open_price >= open_price__gte, data)
-        if open_price__lt:
-            data = filter(lambda it: it.open_price < open_price__lt, data)
-        if open_price__lte:
-            data = filter(lambda it: it.open_price <= open_price__lte, data)
-        if close_price__gt:
-            data = filter(lambda it: it.close_price and it.close_price > close_price__gt, data)
-        if close_price__gte:
-            data = filter(lambda it: it.close_price and it.close_price >= close_price__gte, data)
-        if close_price__lt:
-            data = filter(lambda it: it.close_price and it.close_price < close_price__lt, data)
-        if close_price__lte:
-            data = filter(lambda it: it.close_price and it.close_price <= close_price__lte, data)
-
-        if closed is True:
-            data = filter(lambda it: it.close_price is not None, data)
-        if closed is False:
-            data = filter(lambda it: it.close_price is None, data)
+        if query:
+            data = [deal for deal in data if query(deal)]
 
         data = sorted(data, key=lambda it: it.open_time)
         if count:
