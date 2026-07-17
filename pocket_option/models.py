@@ -1,13 +1,9 @@
-from __future__ import annotations
-
+import datetime
 import enum
 import typing
+import uuid
 
 import pydantic
-
-if typing.TYPE_CHECKING:
-    import datetime
-    import uuid
 
 __all__ = (
     "Asset",
@@ -405,6 +401,10 @@ class Deal(pydantic.BaseModel):
     currency: str
     amount_usd: typing.Annotated[float | None, pydantic.Field(None, alias="amountUSD")]
     request_id: typing.Annotated[int | None, pydantic.Field(None, alias="requestId")]
+
+    @property
+    def closed(self) -> bool:
+        return self.close_timestamp is not None
 
 
 DealListTypeAdapter = pydantic.TypeAdapter(list[Deal])

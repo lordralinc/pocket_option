@@ -6,6 +6,13 @@
             "request": "launch",
             "program": "generator/generate.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "RUN",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "run.py",
+            "console": "integratedTerminal"
         }
     ]
 }

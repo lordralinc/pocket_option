@@ -214,7 +214,7 @@ async def execute_trade(direction: DealAction):
         deal,
     )
     result = await deals.check_deal_result(
-        wait_time=EXPIRATION_TIME,
+        wait_time=EXPIRATION_TIME + 5,
         deal=deal,
     )
     logger.info(

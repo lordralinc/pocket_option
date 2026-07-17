@@ -298,7 +298,7 @@ class DealsStorage:
     async def _on_success_close_deal(self, close_deal: SuccessCloseDealEvent) -> None:
         await self.add_or_update_deal_bulk(close_deal.deals)
         for deal in close_deal.deals:
-            if event := self._close_deal_events.pop(deal.id):
+            if event := self._close_deal_events.pop(deal.id, None):
                 event.set()
 
     @abc.abstractmethod
@@ -344,36 +344,9 @@ class DealsStorage:
     async def get_deals(
         self,
         *,
-        query: Q,
+        query: typing.Any,
         count: int | None = None,
-    ) -> collections.abc.Iterable[Deal]:
-        """
-        Query stored deals using Q expressions.
-
-        Filtering is delegated to Q objects, allowing composition
-        of complex queries.
-
-        Example:
-
-            query = (
-                Q.field("asset", "eq", Asset.AUDCAD_otc)
-                &
-                Q.field("closed", "eq", False)
-            )
-
-            deals = await storage.get_deals(
-                query=query
-            )
-
-        :param query: Deal filter expression
-        :type query: Q
-
-        :param count: Maximum number of returned deals
-        :type count: int | None
-
-        :return: Iterable of deals
-        :rtype: collections.abc.Iterable[Deal]
-        """
+    ) -> collections.abc.Iterable[Deal]: ...
 
 
 class MemoryDealsStorage(DealsStorage):
@@ -410,6 +383,33 @@ class MemoryDealsStorage(DealsStorage):
         query: Q | None = None,
         count: int | None = None,
     ) -> collections.abc.Iterable[Deal]:
+        """
+        Query stored deals using Q expressions.
+
+        Filtering is delegated to Q objects, allowing composition
+        of complex queries.
+
+        Example:
+
+            query = (
+                Q.field("asset", "eq", Asset.AUDCAD_otc)
+                &
+                Q.field("closed", "eq", False)
+            )
+
+            deals = await storage.get_deals(
+                query=query
+            )
+
+        :param query: Deal filter expression
+        :type query: Q
+
+        :param count: Maximum number of returned deals
+        :type count: int | None
+
+        :return: Iterable of deals
+        :rtype: collections.abc.Iterable[Deal]
+        """
         data = self._deals.copy()
 
         if query:
