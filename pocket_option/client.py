@@ -429,7 +429,7 @@ class BasePocketOptionClient:
                 for middleware in self.middlewares:
                     data = await middleware.on(event, data)
                 new_data = _get_data(data)
-                result = _handler(new_data)
+                result = _handler(new_data) if new_data is not None else _handler()
                 if asyncio.iscoroutine(result):
                     result = await result
                 return _get_result(result)

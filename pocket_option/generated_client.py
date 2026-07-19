@@ -4,7 +4,7 @@ from pocket_option import models
 from pocket_option.client import BasePocketOptionClient
 
 if typing.TYPE_CHECKING:
-    from pocket_option.types import TypedEventListener
+    from pocket_option.types import NoDataEventListener, TypedEventListener
 
 __all__ = ("PocketOptionClient",)
 
@@ -278,22 +278,22 @@ class PocketOptionClientOn:
     def connect(
         self,
         handler: None = None,
-    ) -> "typing.Callable[[TypedEventListener[None]], None]": ...
+    ) -> "typing.Callable[[NoDataEventListener], None]": ...
 
     @typing.overload
     def connect(
         self,
-        handler: "TypedEventListener[None]",
+        handler: "NoDataEventListener",
     ) -> None: ...
 
     def connect(
         self,
-        handler: "TypedEventListener[None] | None" = None,
-    ) -> "None | typing.Callable[[TypedEventListener[None]], None]":
+        handler: "NoDataEventListener | None" = None,
+    ) -> "None | typing.Callable[[NoDataEventListener], None]":
         """Triggered when the Socket.IO connection is established.
 
         :param handler: Callback
-        :type handler: TypedEventListener[None] | None
+        :type handler: NoDataEventListener | None
         """
         return self.client.add_on("connect", handler=handler, model=None)
 
@@ -301,22 +301,22 @@ class PocketOptionClientOn:
     def disconnect(
         self,
         handler: None = None,
-    ) -> "typing.Callable[[TypedEventListener[None]], None]": ...
+    ) -> "typing.Callable[[NoDataEventListener], None]": ...
 
     @typing.overload
     def disconnect(
         self,
-        handler: "TypedEventListener[None]",
+        handler: "NoDataEventListener",
     ) -> None: ...
 
     def disconnect(
         self,
-        handler: "TypedEventListener[None] | None" = None,
-    ) -> "None | typing.Callable[[TypedEventListener[None]], None]":
+        handler: "NoDataEventListener | None" = None,
+    ) -> "None | typing.Callable[[NoDataEventListener], None]":
         """Triggered when the Socket.IO connection is closed.
 
         :param handler: Callback
-        :type handler: TypedEventListener[None] | None
+        :type handler: NoDataEventListener | None
         """
         return self.client.add_on("disconnect", handler=handler, model=None)
 

@@ -31,3 +31,6 @@ type SIOEventListener = (
 type TypedEventListener[T] = (
     collections.abc.Callable[[T], None] | collections.abc.Callable[[T], collections.abc.Coroutine[None, None, None]]
 )
+type NoDataEventListener = (
+    collections.abc.Callable[[], None] | collections.abc.Callable[[], collections.abc.Coroutine[None, None, None]]
+)
