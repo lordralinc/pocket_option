@@ -206,6 +206,8 @@ class BasePocketOptionClient:
             self.logger = logger
         else:
             self.logger = logging.getLogger("pocket_option.client")
+        if logger is False:
+            self.logger.setLevel(logging.CRITICAL)
 
     def get_auth_from_packet(self, packet: str) -> models.AuthorizationData:
         packet = packet.removeprefix("42")
