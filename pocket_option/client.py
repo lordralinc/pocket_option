@@ -90,7 +90,8 @@ class BasePocketOptionClient:
         reconnection_delay_max: float = 5.0,
         randomization_factor: float = 0.5,
         logger: bool | logging.Logger = False,
-        engineio_logger: bool = False,
+        socketio_logger: bool | logging.Logger = False,
+        engineio_logger: bool | logging.Logger = False,
         json: JsonFunction | None = None,
         handle_sigint: bool = True,
         request_timeout: float = 5,
@@ -179,7 +180,8 @@ class BasePocketOptionClient:
             reconnection_delay=reconnection_delay,  # pyright: ignore[reportArgumentType]
             reconnection_delay_max=reconnection_delay_max,  # pyright: ignore[reportArgumentType]
             randomization_factor=randomization_factor,
-            logger=logger is not False,
+            logger=socketio_logger,  # type: ignore
+            engineio_logger=engineio_logger,
             serializer="default",
             json=self.json,
             handle_sigint=handle_sigint,
@@ -188,7 +190,6 @@ class BasePocketOptionClient:
             ssl_verify=ssl_verify,
             websocket_extra_options=websocket_extra_options,
             timestamp_requests=timestamp_requests,
-            engineio_logger=engineio_logger,
         )
         self.handlers: list[
             _Handler[
@@ -208,6 +209,31 @@ class BasePocketOptionClient:
             self.logger = logging.getLogger("pocket_option.client")
         if logger is False:
             self.logger.setLevel(logging.CRITICAL)
+
+        self._authorized_event = asyncio.Event()
+
+        self.add_on("successauth", self._on_success_auth)
+
+    async def _on_success_auth(self, _: ...) -> None:
+        self._authorized_event.set()
+
+    @property
+    def is_authorized(self) -> bool:
+        """Check if the client is currently authorized.
+
+        :return: `True` if authorized, `False` otherwise.
+        :rtype: bool
+        """
+        return self._authorized_event.is_set()
+
+    @property
+    def authorized_event(self) -> asyncio.Event:
+        """Get the asyncio event that is set when the client is authorized.
+
+        :return: The asyncio event for authorization.
+        :rtype: asyncio.Event
+        """
+        return self._authorized_event
 
     def get_auth_from_packet(self, packet: str) -> models.AuthorizationData:
         packet = packet.removeprefix("42")
@@ -319,6 +345,7 @@ class BasePocketOptionClient:
         await self._handle_event("connect")
 
     async def handle_disconnect_event(self) -> None:
+        self._authorized_event.clear()
         await self._handle_event("disconnect")
 
     async def _handle_event(self, event_name: str, data: bytes | None = None) -> JsonValue | None:
