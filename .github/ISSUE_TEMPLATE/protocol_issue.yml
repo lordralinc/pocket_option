@@ -1,0 +1,23 @@
+name: Protocol issue
+description: Report unknown API behavior
+title: "[PROTOCOL] "
+labels:
+  - protocol
+
+body:
+  - type: input
+    id: event
+    attributes:
+      label: Event name
+      placeholder: updateStream
+
+  - type: textarea
+    id: payload
+    attributes:
+      label: Received payload
+      render: json
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior

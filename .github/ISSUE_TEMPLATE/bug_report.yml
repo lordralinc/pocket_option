@@ -1,0 +1,74 @@
+name: Bug report
+description: Report a problem with pocket_option
+title: "[BUG] "
+labels:
+  - bug
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug.
+        Please provide enough information to reproduce it.
+
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: Which version are you using?
+      placeholder: "0.2.7"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: python
+    attributes:
+      label: Python version
+      options:
+        - "3.13"
+        - "3.14"
+        - "Other"
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Component
+      options:
+        - Client
+        - WebSocket
+        - Events
+        - Models
+        - Trading API
+        - Storage
+        - Other
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: |
+        Minimal example:
+
+        ```python
+        from pocket_option import PocketOptionClient
+        ```
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste logs here
+      render: shell
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior

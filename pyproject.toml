@@ -1,6 +1,6 @@
 [project]
 name = "pocket-option"
-version = "0.2.6"
+version = "0.2.7"
 description = "Async API client for Pocket Option platform"
 authors = [{ name = "Yury \"lordralinc\" Yushmanov" }]
 license = "MIT"

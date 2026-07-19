@@ -84,7 +84,7 @@ from pocket_option.models import (
 )
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s | %(levelname)s | %(message)s",
 )
 
@@ -99,13 +99,12 @@ OPTION_TYPE = 100
 IS_DEMO = 1
 
 
-client = PocketOptionClient()
+client = PocketOptionClient(logger=True)
 
 candles = MemoryCandleStorage(client)
 deals = MemoryDealsStorage(client)
 
 stop_event = asyncio.Event()
-authorized_event = asyncio.Event()
 
 ping_task_handle: asyncio.Task | None = None
 
@@ -132,7 +131,7 @@ async def start_ping() -> None:
 
 
 @client.on.connect
-async def on_connect(_: None):
+async def on_connect():
     logger.info("Connected")
     stop_event.clear()
     await start_ping()
@@ -166,7 +165,6 @@ async def on_success_auth(data: SuccessAuthEvent):
     )
 
     await client.emit.subscribe_for_market_sentiment(ASSET)
-    authorized_event.set()
     logger.info("Trading ready")
 
 
@@ -177,12 +175,10 @@ async def on_update_close_value(
     logger.debug("Assets updated: %s", assets)
 
 
-@client.on.disconnect()
-async def on_disconnect(_: None):
+@client.on.disconnect
+async def on_disconnect():
     logger.warning("Disconnected")
-
     stop_event.set()
-    authorized_event.clear()
 
 
 def get_signal() -> DealAction | None:
@@ -223,7 +219,7 @@ async def execute_trade(direction: DealAction):
 
 
 async def trader_loop():
-    await authorized_event.wait()
+    await client.authorized_event.wait()
     logger.info("Trader started")
     while not stop_event.is_set():
         try:
@@ -240,7 +236,6 @@ async def trader_loop():
 
 
 async def main():
-
     try:
         await client.connect(Regions.DEMO)
         await trader_loop()
@@ -257,7 +252,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
 ```
 
 ## 📜 Лицензия
