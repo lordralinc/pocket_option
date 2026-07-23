@@ -695,14 +695,38 @@ MarketSentimentItemListTypeAdapter = pydantic.TypeAdapter(list[MarketSentimentIt
 
 
 class LoadHistoryPeriodRequest(pydantic.BaseModel):
+    """
+    Request historical candlestick data for a specific time range.
+
+    :ivar asset: Trading asset.
+    :ivar index:
+    :ivar time: Timestamp.
+    :ivar offset:
+    :ivar period: Candle timeframe in seconds
+    """
+
+    # TODO(lordralinc): Document the index field for the loadHistoryPeriod event (#5)
+
     asset: Asset
-    index: int
-    time: datetime.datetime
+    index: int | None
+    time: float
     offset: int
     period: int
 
 
 class LoadHistoryPeriodItem(pydantic.BaseModel):
+    """
+    Historical candlestick (OHLCV) data.
+
+    :ivar symbol_id:
+    :ivar time:     Candle opening time as a Unix timestamp in seconds.
+    :ivar open:     Opening price.
+    :ivar close:    Closing price.
+    :ivar high:     Highest price during the candle.
+    :ivar low:      Lowest price during the candle.
+    :ivar volume:   Tick volume for the candle.
+    """
+
     symbol_id: int
     time: int
     open: float
@@ -713,7 +737,16 @@ class LoadHistoryPeriodItem(pydantic.BaseModel):
 
 
 class LoadHistoryPeriodFastResponse(pydantic.BaseModel):
+    """
+    Response containing historical candlestick data.
+
+    :ivar asset:    Trading asset.
+    :ivar index:
+    :ivar period:   Candle timeframe in seconds.
+    :ivar data:     List of historical candlesticks.
+    """
+
     asset: Asset
-    index: int
+    index: int | None
     period: int
     data: list[LoadHistoryPeriodItem]

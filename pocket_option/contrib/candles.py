@@ -6,6 +6,7 @@ import datetime
 import math
 import typing
 from collections import defaultdict, deque
+from itertools import chain
 
 import pydantic
 import pytz
@@ -60,31 +61,33 @@ class CandleStorage(abc.ABC):
         self.client.on.load_history_period_fast(self._on_load_history_period_fast)
 
     async def _on_load_history_period_fast(self, data: LoadHistoryPeriodFastResponse) -> None:
-        items = []
-
-        for it in data.data:
-            items.extend(
-                [
-                    UpdateCloseValueItem(asset=data.asset, timestamp=it.time, value=it.open),
-                    UpdateCloseValueItem(
-                        asset=data.asset,
-                        timestamp=it.time + 0.01,
-                        value=it.low,
-                    ),
-                    UpdateCloseValueItem(
-                        asset=data.asset,
-                        timestamp=it.time + 0.02,
-                        value=it.high,
-                    ),
-                    UpdateCloseValueItem(
-                        asset=data.asset,
-                        timestamp=it.time + (data.period - 0.01),
-                        value=it.close,
-                    ),
-                ],
-            )
-
-        await self.add_item_bulk(items)
+        await self.add_item_bulk(
+            list(
+                chain.from_iterable(
+                    [
+                        [
+                            UpdateCloseValueItem(asset=data.asset, timestamp=it.time, value=it.open),
+                            UpdateCloseValueItem(
+                                asset=data.asset,
+                                timestamp=it.time + 0.01,
+                                value=it.low,
+                            ),
+                            UpdateCloseValueItem(
+                                asset=data.asset,
+                                timestamp=it.time + 0.02,
+                                value=it.high,
+                            ),
+                            UpdateCloseValueItem(
+                                asset=data.asset,
+                                timestamp=it.time + (data.period - 0.01),
+                                value=it.close,
+                            ),
+                        ]
+                        for it in data.data
+                    ],
+                ),
+            ),
+        )
 
     async def _on_update_close_value(self, items: list[UpdateCloseValueItem]) -> None:
         await self.add_item_bulk(items)
