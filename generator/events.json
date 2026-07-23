@@ -83,6 +83,13 @@
       "event": "chafor",
       "return_type": "list[models.MarketSentimentItem]",
       "pydantic_model": "models.MarketSentimentItemListTypeAdapter"
+    },
+    {
+      "name": "load_history_period_fast",
+      "doc": "Triggered when historical market data for a specific period is loaded.",
+      "event": "loadHistoryPeriodFast",
+      "return_type": "models.LoadHistoryPeriodResponse",
+      "pydantic_model": "models.LoadHistoryPeriodResponse"
     }
   ],
   "emit": [
@@ -174,6 +181,16 @@
         "name": "data",
         "type": "models.CopySignalRequest",
         "doc": "Copy signal execution parameters."
+      }
+    },
+    {
+      "name": "load_history_period",
+      "doc": "Requests historical market data for a specific period.",
+      "event": "loadHistoryPeriod",
+      "args": {
+        "name": "data",
+        "type": "models.LoadHistoryPeriodRequest",
+        "doc": "Historical data request parameters."
       }
     }
   ]

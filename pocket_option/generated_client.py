@@ -85,6 +85,14 @@ class PocketOptionClientEmit:
         """
         await self.client.send("copySignalOrder", data)
 
+    async def load_history_period(self, data: models.LoadHistoryPeriodRequest) -> None:
+        """Requests historical market data for a specific period.
+
+        :param data: Historical data request parameters.
+        :type data: models.LoadHistoryPeriodRequest
+        """
+        await self.client.send("loadHistoryPeriod", data)
+
 
 class PocketOptionClientOn:
     def __init__(self, client: BasePocketOptionClient) -> None:
@@ -365,6 +373,29 @@ class PocketOptionClientOn:
         :type handler: TypedEventListener[list[models.MarketSentimentItem]] | None
         """
         return self.client.add_on("chafor", handler=handler, model=models.MarketSentimentItemListTypeAdapter)
+
+    @typing.overload
+    def load_history_period_fast(
+        self,
+        handler: None = None,
+    ) -> "typing.Callable[[TypedEventListener[models.LoadHistoryPeriodFastResponse]], None]": ...
+
+    @typing.overload
+    def load_history_period_fast(
+        self,
+        handler: "TypedEventListener[models.LoadHistoryPeriodFastResponse]",
+    ) -> None: ...
+
+    def load_history_period_fast(
+        self,
+        handler: "TypedEventListener[models.LoadHistoryPeriodFastResponse] | None" = None,
+    ) -> "None | typing.Callable[[TypedEventListener[models.LoadHistoryPeriodFastResponse]], None]":
+        """Triggered when historical market data for a specific period is loaded.
+
+        :param handler: Callback
+        :type handler: TypedEventListener[models.LoadHistoryPeriodResponse] | None
+        """
+        return self.client.add_on("loadHistoryPeriodFast", handler=handler, model=models.LoadHistoryPeriodFastResponse)
 
 
 class PocketOptionClient(BasePocketOptionClient):

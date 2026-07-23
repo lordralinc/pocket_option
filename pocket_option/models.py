@@ -692,3 +692,28 @@ class MarketSentimentItem(pydantic.BaseModel):
 
 
 MarketSentimentItemListTypeAdapter = pydantic.TypeAdapter(list[MarketSentimentItem])
+
+
+class LoadHistoryPeriodRequest(pydantic.BaseModel):
+    asset: Asset
+    index: int
+    time: datetime.datetime
+    offset: int
+    period: int
+
+
+class LoadHistoryPeriodItem(pydantic.BaseModel):
+    symbol_id: int
+    time: int
+    open: float
+    close: float
+    high: float
+    low: float
+    volume: int
+
+
+class LoadHistoryPeriodFastResponse(pydantic.BaseModel):
+    asset: Asset
+    index: int
+    period: int
+    data: list[LoadHistoryPeriodItem]

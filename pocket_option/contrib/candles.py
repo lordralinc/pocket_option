@@ -11,7 +11,7 @@ import pydantic
 import pytz
 
 from pocket_option.generated_client import PocketOptionClient
-from pocket_option.models import Asset, UpdateCloseValueItem
+from pocket_option.models import Asset, LoadHistoryPeriodFastResponse, UpdateCloseValueItem
 from pocket_option.utils import append_or_replace
 
 if typing.TYPE_CHECKING:
@@ -57,6 +57,34 @@ class CandleStorage(abc.ABC):
         self.client = client
 
         self.client.on.update_close_value(self._on_update_close_value)
+        self.client.on.load_history_period_fast(self._on_load_history_period_fast)
+
+    async def _on_load_history_period_fast(self, data: LoadHistoryPeriodFastResponse) -> None:
+        items = []
+
+        for it in data.data:
+            items.extend(
+                [
+                    UpdateCloseValueItem(asset=data.asset, timestamp=it.time, value=it.open),
+                    UpdateCloseValueItem(
+                        asset=data.asset,
+                        timestamp=it.time + 0.01,
+                        value=it.low,
+                    ),
+                    UpdateCloseValueItem(
+                        asset=data.asset,
+                        timestamp=it.time + 0.02,
+                        value=it.high,
+                    ),
+                    UpdateCloseValueItem(
+                        asset=data.asset,
+                        timestamp=it.time + (data.period - 0.01),
+                        value=it.close,
+                    ),
+                ],
+            )
+
+        await self.add_item_bulk(items)
 
     async def _on_update_close_value(self, items: list[UpdateCloseValueItem]) -> None:
         await self.add_item_bulk(items)
