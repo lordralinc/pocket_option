@@ -1,0 +1,64 @@
+version: 2
+
+updates:
+  # Python-зависимости (Poetry)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+
+    open-pull-requests-limit: 10
+
+    labels:
+      - "dependencies"
+
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+    reviewers:
+      - "lordralinc"
+
+    groups:
+      production:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "pytest*"
+          - "ruff*"
+          - "mypy*"
+          - "types-*"
+          - "coverage*"
+          - "pytest-asyncio"
+          - "pre-commit"
+
+      development:
+        patterns:
+          - "pytest*"
+          - "ruff*"
+          - "mypy*"
+          - "types-*"
+          - "coverage*"
+          - "pytest-asyncio"
+          - "pre-commit"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:15"
+      timezone: "UTC"
+
+    labels:
+      - "dependencies"
+
+    commit-message:
+      prefix: "ci"
+
+    reviewers:
+      - "lordralinc"
