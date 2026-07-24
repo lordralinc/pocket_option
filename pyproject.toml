@@ -1,6 +1,6 @@
 [project]
 name = "pocket-option"
-version = "0.2.8"
+version = "0.2.9"
 description = "Async API client for Pocket Option platform"
 authors = [{ name = "Yury \"lordralinc\" Yushmanov" }]
 license = "MIT"
@@ -24,9 +24,6 @@ keywords = [
     "fintech",
     "api",
     "api client",
-    "trading bot",
-    "algorithmic trading",
-    "automated trading",
     "websocket",
     "websocket client",
     "market data",
@@ -139,6 +136,7 @@ lint.fixable = ["I", "RUF022", "UP035"]
     "PLR2004",
     "D",
 ]
+"pocket_option/generated_client.py" = ["ERA001"]
 
 [tool.ruff.format]
 quote-style = "double"

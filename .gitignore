@@ -60,7 +60,11 @@ cython_debug/
 
 .ruff_cache/
 .pypirc
-reverse/
+
+
+reverse/*
+!reverse/emit_events.md
+!reverse/on_events.md
+
 
 run.py
-main.js
