@@ -6,6 +6,7 @@ import subprocess
 
 import jinja2
 import pydantic
+import yaml
 from rich.logging import RichHandler
 
 logging.basicConfig(
@@ -47,8 +48,15 @@ env = jinja2.Environment(loader=jinja2.FileSystemLoader(pathlib.Path(__file__).p
 
 
 def generate():
-    data = Data.model_validate_json(
-        pathlib.Path(pathlib.Path(__file__).parent, "events.json").read_bytes(),
+    data = Data.model_validate(
+        {
+            "on": yaml.safe_load(
+                pathlib.Path(pathlib.Path(__file__).parent, "on_events.yaml").read_text(encoding="utf-8"),
+            ),
+            "emit": yaml.safe_load(
+                pathlib.Path(pathlib.Path(__file__).parent, "emit_events.yaml").read_text(encoding="utf-8"),
+            ),
+        },
     )
 
     layout = env.get_template("layout.jinja2")
