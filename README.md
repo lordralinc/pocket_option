@@ -69,18 +69,14 @@ import asyncio
 import logging
 import os
 import random
-from contextlib import suppress
 
 from pocket_option import PocketOptionClient
 from pocket_option.constants import Regions
-from pocket_option.contrib.candles import MemoryCandleStorage
-from pocket_option.contrib.deals import MemoryDealsStorage
+from pocket_option.contrib.default_init import default_init
 from pocket_option.models import (
     Asset,
     AuthorizationData,
-    ChangeAssetRequest,
     DealAction,
-    SuccessAuthEvent,
     UpdateCloseValueItem,
 )
 
@@ -90,7 +86,8 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
+rng = random.SystemRandom()
+client = PocketOptionClient(logger=True)
 
 ASSET = Asset.AUDCAD_otc
 TRADE_AMOUNT = 10
@@ -99,74 +96,21 @@ CANDLE_PERIOD = 30
 OPTION_TYPE = 100
 IS_DEMO = 1
 
-
-client = PocketOptionClient(logger=True)
-
-candles = MemoryCandleStorage(client)
-deals = MemoryDealsStorage(client)
-
-stop_event = asyncio.Event()
-
-ping_task_handle: asyncio.Task | None = None
-
-rng = random.SystemRandom()
-
-
-async def ping_loop() -> None:
-    try:
-        while not stop_event.is_set():
-            await client.emit.ps()
-            await asyncio.sleep(60)
-
-    except asyncio.CancelledError:
-        logger.info("Ping task stopped")
-
-
-async def start_ping() -> None:
-    global ping_task_handle  # noqa: PLW0603
-
-    if ping_task_handle and not ping_task_handle.done():
-        return
-
-    ping_task_handle = asyncio.create_task(ping_loop())
-
-
-@client.on.connect
-async def on_connect():
-    logger.info("Connected")
-    stop_event.clear()
-    await start_ping()
-    await client.emit.auth(
-        AuthorizationData.model_validate(
-            {
-                "session": os.environ["PO_SESSION"],
-                "isDemo": IS_DEMO,
-                "uid": int(os.environ["PO_UID"]),
-                "platform": 2,
-                "isFastHistory": True,
-                "isOptimized": True,
-            },
-        ),
-    )
-
-
-@client.on.success_auth
-async def on_success_auth(data: SuccessAuthEvent):
-    logger.info("Authorized: %s", data.id)
-
-    await client.emit.indicator_load()
-    await client.emit.favorite_load()
-    await client.emit.price_alert_load()
-    await client.emit.subscribe_to_asset(ASSET)
-    await client.emit.change_asset(
-        ChangeAssetRequest(
-            asset=ASSET,
-            period=CANDLE_PERIOD,
-        ),
-    )
-
-    await client.emit.subscribe_for_market_sentiment(ASSET)
-    logger.info("Trading ready")
+default_init(
+    client,
+    authorization=AuthorizationData.model_validate(
+        {
+            "session": os.environ["PO_SESSION"],
+            "isDemo": IS_DEMO,
+            "uid": int(os.environ["PO_UID"]),
+            "platform": 2,
+            "isFastHistory": True,
+            "isOptimized": True,
+        },
+    ),
+    sub_assets=[ASSET],
+    sub_period=CANDLE_PERIOD,
+)
 
 
 @client.on.update_close_value
@@ -174,12 +118,6 @@ async def on_update_close_value(
     assets: list[UpdateCloseValueItem],
 ):
     logger.debug("Assets updated: %s", assets)
-
-
-@client.on.disconnect
-async def on_disconnect():
-    logger.warning("Disconnected")
-    stop_event.set()
 
 
 def get_signal() -> DealAction | None:
@@ -197,7 +135,7 @@ async def execute_trade(direction: DealAction):
         "Opening %s trade",
         direction.name,
     )
-    deal = await deals.open_deal(
+    deal = await client.deals.open_deal(
         asset=ASSET,
         amount=TRADE_AMOUNT,
         action=direction,
@@ -209,7 +147,7 @@ async def execute_trade(direction: DealAction):
         "Deal opened: %s",
         deal,
     )
-    result = await deals.check_deal_result(
+    result = await client.deals.check_deal_result(
         wait_time=EXPIRATION_TIME + 5,
         deal=deal,
     )
@@ -222,13 +160,12 @@ async def execute_trade(direction: DealAction):
 async def trader_loop():
     await client.authorized_event.wait()
     logger.info("Trader started")
-    while not stop_event.is_set():
+    while True:
         try:
             signal = get_signal()
             if signal is None:
                 await asyncio.sleep(5)
                 continue
-
             await execute_trade(signal)
             await asyncio.sleep(5)
         except Exception:
@@ -242,17 +179,13 @@ async def main():
         await trader_loop()
     except KeyboardInterrupt:
         logger.info("Stopping...")
-
     finally:
-        stop_event.set()
-        if ping_task_handle:
-            ping_task_handle.cancel()
-            with suppress(asyncio.CancelledError):
-                await ping_task_handle
+        await client.disconnect()
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 ```
 
 ## 📜 License

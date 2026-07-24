@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import abc
 import collections.abc
+import contextlib
 import datetime
 import math
+import os
+import pathlib
 import typing
+import warnings
 from collections import defaultdict, deque
 from itertools import chain
 
@@ -59,6 +63,8 @@ class CandleStorage(abc.ABC):
 
         self.client.on.update_close_value(self._on_update_close_value)
         self.client.on.load_history_period_fast(self._on_load_history_period_fast)
+
+        self.client.candles = self
 
     async def _on_load_history_period_fast(self, data: LoadHistoryPeriodFastResponse) -> None:
         await self.add_item_bulk(
@@ -171,6 +177,18 @@ class CandleStorage(abc.ABC):
         :rtype: collections.abc.Iterable[UpdateCloseValueItem]
         """
 
+    @abc.abstractmethod
+    async def get_first_item(self, asset: Asset) -> UpdateCloseValueItem | None:
+        """
+        Retrieve the first price update for the given asset.
+
+        :param asset: Asset to query.
+        :type asset: Asset
+
+        :return: First price update or None if no data exists.
+        :rtype: UpdateCloseValueItem | None
+        """
+
     async def get_candles(
         self,
         asset: Asset,
@@ -276,6 +294,14 @@ class MemoryCandleStorage(CandleStorage):
         """
         self._storage = defaultdict(lambda: deque(maxlen=_max_len))
 
+    async def get_first_item(self, asset: Asset) -> UpdateCloseValueItem | None:
+        items = self._storage.get(asset, [])
+        if not items:
+            return None
+        with contextlib.suppress(ValueError):
+            return min(items, key=lambda i: i.timestamp)
+        return None
+
     async def add_item(self, item: UpdateCloseValueItem):
         self._storage[item.asset] = append_or_replace(self._storage[item.asset], item, ["asset", "timestamp"])
 
@@ -301,3 +327,25 @@ class MemoryCandleStorage(CandleStorage):
         if count is not None:
             items = items[-count:]
         return items
+
+
+class JSONCandleStorage(MemoryCandleStorage):
+    TYPE_ADAPTER = pydantic.TypeAdapter(dict[Asset, deque[UpdateCloseValueItem]])
+
+    def __init__(self, client: PocketOptionClient) -> None:
+        super().__init__(client)
+        self.path = pathlib.Path("reverse", "candles.json")
+        if os.environ.get("PO_DEBUG") != "1":
+            warnings.warn(
+                "JSONCandleStorage is intended for development/testing only. Do not use it in production.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+
+    def save(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_bytes(self.TYPE_ADAPTER.dump_json(self._storage, indent=2))
+
+    async def add_item(self, item: UpdateCloseValueItem):
+        await super().add_item(item)
+        self.save()

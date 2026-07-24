@@ -83,6 +83,8 @@ class DealsStorage:
         self.client.on.update_opened_deals(self.add_or_update_deal_bulk)
         self.client.on.update_closed_deals(self.add_or_update_deal_bulk)
 
+        self.client.deals = self
+
     async def open_deal(
         self,
         asset: Asset,
