@@ -19,6 +19,9 @@ if typing.TYPE_CHECKING:
     import aiohttp
 
     from pocket_option import models
+    from pocket_option.contrib.assets import AssetsStorage
+    from pocket_option.contrib.candles import CandleStorage
+    from pocket_option.contrib.deals import DealsStorage
     from pocket_option.middleware import Middleware
     from pocket_option.types import EmitCallback, JsonFunction, JsonValue, SIOEventListener
 
@@ -36,40 +39,6 @@ class BasePocketOptionClient:
     Base asynchronous Socket.IO client for PocketOption API.
 
     Provides low-level communication layer with PocketOption server.
-
-    The client is responsible for:
-
-        - establishing WebSocket connection;
-        - managing Socket.IO events;
-        - applying incoming and outgoing middlewares;
-        - serializing and deserializing JSON payloads;
-        - registering typed event handlers;
-        - sending and receiving API messages.
-
-    Event flow:
-
-        Socket.IO event
-              |
-              v
-        middleware chain
-              |
-              v
-        data validation
-              |
-              v
-        user callback
-
-
-    Middleware flow:
-
-        send()
-          |
-          v
-        emit middlewares
-          |
-          v
-        Socket.IO
-
 
     The class is intended to be extended by higher-level clients
     implementing PocketOption-specific API methods.
@@ -213,6 +182,70 @@ class BasePocketOptionClient:
         self._authorized_event = asyncio.Event()
 
         self.add_on("successauth", self._on_success_auth)
+
+        self._candle_storage: CandleStorage | None = None
+        self._deals_storage: DealsStorage | None = None
+        self._assets_storage: AssetsStorage | None = None
+
+    @property
+    def candles(self) -> CandleStorage:
+        """Get the candle storage instance.
+
+        :return: CandleStorage instance.
+        :rtype: CandleStorage
+        """
+        if self._candle_storage is None:
+            raise RuntimeError("CandleStorage is not initialized. Create storage first.")
+        return self._candle_storage
+
+    @candles.setter
+    def candles(self, storage: CandleStorage) -> None:
+        """Set the candle storage instance.
+
+        :param storage: CandleStorage instance.
+        :type storage: CandleStorage
+        """
+        self._candle_storage = storage
+
+    @property
+    def deals(self) -> DealsStorage:
+        """Get the deals storage instance.
+
+        :return: DealsStorage instance.
+        :rtype: DealsStorage
+        """
+        if self._deals_storage is None:
+            raise RuntimeError("DealsStorage is not initialized. Create storage first.")
+        return self._deals_storage
+
+    @deals.setter
+    def deals(self, storage: DealsStorage) -> None:
+        """Set the deals storage instance.
+
+        :param storage: DealsStorage instance.
+        :type storage: DealsStorage
+        """
+        self._deals_storage = storage
+
+    @property
+    def assets(self) -> AssetsStorage:
+        """Get the assets storage instance.
+
+        :return: AssetsStorage instance.
+        :rtype: AssetsStorage
+        """
+        if self._assets_storage is None:
+            raise RuntimeError("AssetsStorage is not initialized. Create storage first.")
+        return self._assets_storage
+
+    @assets.setter
+    def assets(self, storage: AssetsStorage) -> None:
+        """Set the assets storage instance.
+
+        :param storage: AssetsStorage instance.
+        :type storage: AssetsStorage
+        """
+        self._assets_storage = storage
 
     async def _on_success_auth(self, _: ...) -> None:
         self._authorized_event.set()
@@ -405,17 +438,6 @@ class BasePocketOptionClient:
             - middleware processing;
             - Pydantic model validation;
             - response serialization.
-
-
-        Example:
-
-            @client.add_on(
-                "success_open_deal",
-                model=Deal,
-            )
-            async def on_deal(deal: Deal):
-                print(deal)
-
 
         :param event: Socket.IO event name.
         :type event: str

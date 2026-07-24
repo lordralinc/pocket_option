@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
 
     from pocket_option.types import JsonFunction, JsonValue
 
-__all__ = ("Q", "append_or_replace", "fix_timestamp", "generate_request_id", "get_json_function")
+__all__ = ("Q", "append_or_replace", "fix_timestamp", "generate_index", "generate_request_id", "get_json_function")
 
 rnd = random.SystemRandom()
 
@@ -235,5 +235,13 @@ def append_or_replace[T](
     return array
 
 
+def get_server_time() -> float:
+    return time.time() - TIMESTAMP_OFFSET
+
+
 def generate_request_id() -> int:
-    return int(time.time()) - TIMESTAMP_OFFSET + rnd.randint(1, 100)
+    return int(get_server_time()) + rnd.randint(1, 100)
+
+
+def generate_index() -> int:
+    return int(f"{int(get_server_time())}{rnd.randint(1, 100)}")

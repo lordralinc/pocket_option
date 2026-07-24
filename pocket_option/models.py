@@ -546,11 +546,8 @@ class ChangeAssetRequest(pydantic.BaseModel):
     """
     Request model for changing active trading asset subscription.
 
-    :ivar asset:
-        Trading asset to subscribe.
-
-    :ivar period:
-        Market update period.
+    :ivar asset: Trading asset to subscribe.
+    :ivar period: Market update period.
     """
 
     asset: Asset
@@ -589,88 +586,63 @@ class AssetItemTimeframe(pydantic.BaseModel):
 
 class UpdateAssetItem(pydantic.BaseModel):
     """
-    Asset metadata update model.
+    Model describing an asset update item received from the trading server.
 
-    Contains trading asset configuration, availability state,
-    payout information and supported timeframes.
+    Contains asset metadata, payout information, expiration settings,
+    OTC mapping, availability status, and supported timeframes.
 
-    :ivar id:
-        Internal asset identifier.
+    :ivar id: Unique asset identifier.
+    :ivar asset: Asset symbol identifier.
+    :ivar label: Human-readable asset name.
+    :ivar type: Asset category.
 
-    :ivar asset:
-        Trading asset symbol.
+    :ivar digits: Number of decimal places used for asset prices.
+    :ivar payout: Current payout percentage for the asset.
+    :ivar default_expiration: Default trade expiration time in seconds.
+    :ivar min_expiration: Minimum allowed trade expiration time in seconds.
+    :ivar expiration_step: Step size for changing expiration time in seconds.
 
-    :ivar label:
-        Human-readable asset name.
+    :ivar is_otc: Whether the asset is an OTC asset.
+    :ivar otc_id: Identifier of the OTC asset counterpart.
+    :ivar real_id: Identifier of the real market asset counterpart.
 
-    :ivar type:
-        Asset category.
+    :ivar signals: Additional asset signals or metadata provided by the server.
 
-    :ivar precision:
-        Price precision.
+    :ivar exp_time: Asset expiration timestamp.
+    :ivar active: Whether the asset is currently available for trading.
 
-    :ivar payout:
-        Current payout percentage.
-
-    :ivar min_duration:
-        Minimum supported duration.
-
-    :ivar max_duration:
-        Maximum supported duration.
-
-    :ivar step_duration:
-        Duration increment step.
-
-    :ivar volatility_index:
-        Asset volatility indicator.
-
-    :ivar spread:
-        Current spread value.
-
-    :ivar leverage:
-        Available leverage.
-
-    :ivar extra_data:
-        Additional asset metadata.
-
-    :ivar expire_time:
-        Expiration time.
-
-    :ivar is_active:
-        Indicates whether the asset is available.
-
-    :ivar timeframes:
-        Supported trading timeframes.
-
-    :ivar start_time:
-        Asset availability start timestamp.
-
-    :ivar default_timeframe:
-        Default timeframe used by the platform.
-
-    :ivar status_code:
-        Current asset status code.
+    :ivar timeframes: List of supported trade expiration timeframes.
+    :ivar scheduled_until: Timestamp until which the asset schedule is valid.
+    :ivar min_quick_timeframe: Minimum timeframe available for quick trades.
+    :ivar scheduled_at: Timestamp when the asset schedule was created.
     """
 
     id: int
-    asset: typing.Annotated[Asset, pydantic.Field(..., alias="symbol")]
+    asset: Asset
     label: str
     type: AssetType
-    precision: int
+
+    digits: int
     payout: int
-    min_duration: int
-    max_duration: int
-    step_duration: int
-    volatility_index: int
-    spread: int
-    leverage: int
-    extra_data: list[pydantic.JsonValue]
-    expire_time: int
-    is_active: bool
+
+    default_expiration: int
+    min_expiration: int
+    expiration_step: int
+
+    is_otc: bool
+    otc_id: int
+    real_id: int
+
+    signals: list[typing.Any]
+
+    exp_time: int
+    active: bool
+
     timeframes: list[AssetItemTimeframe]
-    start_time: int
-    default_timeframe: int
-    status_code: int
+
+    scheduled_until: int
+    min_quick_timeframe: int
+    scheduled_at: int
 
 
 UpdateAssetItemListTypeAdapter = pydantic.TypeAdapter(list[UpdateAssetItem])
@@ -704,8 +676,6 @@ class LoadHistoryPeriodRequest(pydantic.BaseModel):
     :ivar offset:
     :ivar period: Candle timeframe in seconds
     """
-
-    # TODO(lordralinc): Document the index field for the loadHistoryPeriod event (#5)
 
     asset: Asset
     index: int | None
