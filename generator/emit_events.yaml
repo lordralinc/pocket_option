@@ -2,98 +2,141 @@
 - name: ps
   doc: Sends a heartbeat request to keep the connection alive.
   event: ps
-- name: indicator_load
-  doc: Indicates that indicator data has been loaded by the platform.
-  event: indicator/load
-- name: favorite_load
-  doc: Indicates that favorite has been loaded by the platform.
-  event: favorite/load
-- name: price_alert_load
-  doc: Indicates that price alert data has been loaded by the platform.
-  event: price-alert/load
+  category: common
+
 - name: auth
   doc: Authorizes the client session.
   event: auth
+  category: common
   args:
     name: data
     type: models.AuthorizationData
     doc: Authorization payload containing session and account information.
+
+- name: indicator_load
+  doc: Indicates that indicator data has been loaded by the platform.
+  event: indicator/load
+  category: indicator
+
+- name: favorite_load
+  doc: Indicates that favorite has been loaded by the platform.
+  event: favorite/load
+  category: ui
+
+- name: price_alert_load
+  doc: Indicates that price alert data has been loaded by the platform.
+  event: price-alert/load
+  category: ui
+
 - name: subscribe_to_asset
   doc: Subscribes to real-time updates for a trading asset.
   event: subscribeSymbol
+  category: assets
   args:
     name: asset
     type: models.Asset
     doc: Trading asset to subscribe.
+
 - name: subscribe_for_market_sentiment
   doc: Subscribes to market sentiment updates for an asset.
   event: subfor
+  category: assets
   args:
     name: asset
     type: models.Asset
     doc: Trading asset for sentiment tracking.
+
 - name: unsubscribe_for_market_sentiment
   doc: Removes market sentiment subscription for an asset.
   event: unsubfor
+  category: assets
   args:
     name: asset
     type: models.Asset
     doc: Trading asset to remove from sentiment tracking.
+
 - name: change_asset
   doc: Changes the active trading asset and timeframe.
   event: changeSymbol
+  category: assets
   args:
     name: data
     type: models.ChangeAssetRequest
     doc: Asset change request parameters.
+
 - name: open_deal
   doc: Creates a new trading deal.
   event: openOrder
+  category: deals
   args:
     name: data
     type: models.OpenDealRequest
     doc: Deal opening parameters.
+
 - name: copy_signal
   doc: Creates a deal from a copy trading signal.
   event: copySignalOrder
+  category: deals
   args:
     name: data
     type: models.CopySignalRequest
     doc: Copy signal execution parameters.
+
 - name: load_history_period
   doc: Requests historical market data for a specific period.
   event: loadHistoryPeriod
+  category: common
   args:
     name: data
     type: models.LoadHistoryPeriodRequest
     doc: Historical data request parameters.
+
 - name: deals_ai
   doc: AI deal operation.
   event: deals/ai
+  category: deals
+
 - name: ai_strategy_multi_get_state
   doc: Get AI strategy state.
   event: ai-strategy-multi/get-state
+  category: ai
+
 - name: update_balance
   doc: Request balance update.
   event: updateBalance
+  category: common
+
 - name: social_enable_only_watched
   doc: Enable watched filter.
   event: social/enable-only-watched
+  category: deals
+
 - name: social_disable_only_watched
   doc: Disable watched filter.
   event: social/disable-only-watched
+  category: deals
+
 - name: demo_refill_balance
   doc: Refill demo account balance.
   event: td/refill
+  category: common
+
 - name: update_closed_expresses
   doc: "# TODO: document this"
   event: updateClosedExpresses
+  category: deals
+
 - name: signals_subscribe
   doc: "# TODO: document this"
   event: signals/subscribe
+  category: signals
+
 - name: signals_unsubscribe
   doc: "# TODO: document this"
   event: signals/unsubscribe
+  category: signals
+
 - name: update_opened_deals
   doc: "# TODO: document this"
   event: updateOpenedDeals
+  category: deals

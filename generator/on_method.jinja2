@@ -17,6 +17,9 @@
         handler: "{{ listener }} | None" = None,
     ) -> "None | typing.Callable[[{{ listener }}], None]":
         """{{ on_method.doc or 'No description' }}
+        {% if on_method.category %}
+        Category: `{{ on_method.category }}`
+        {% endif %}
 
         :param handler: Callback
         :type handler: {{ listener }} | None

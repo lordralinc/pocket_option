@@ -1,3 +1,5 @@
+# Common events
+
 | Client name                | Event name                           | Implemented |                   Blink                   |
 | -------------------------- | ------------------------------------ | :---------: | :---------------------------------------: |
 | `disconnect`               | `disconnect`                         |     [x]     |             [🔗](#disconnect)             |
@@ -5,39 +7,83 @@
 | `success_auth`             | `successauth`                        |     [x]     |            [🔗](#successauth)             |
 | ``                         | `NotAuthorized`                      |     [ ]     |           [🔗](#notauthorized)            |
 | `update_balance`           | `successupdateBalance`               |     [x]     |        [🔗](#successupdatebalance)        |
-| `update_assets`            | `updateAssets`                       |     [x]     |            [🔗](#updateassets)            |
-| `update_close_value`       | `updateStream`                       |     [x]     |            [🔗](#updatestream)            |
-| ``                         | `updateHistoryNew`                   |     [ ]     |          [🔗](#updatehistorynew)          |
-| `update_history_new_fast`  | `updateHistoryNewFast`               |     [x]     |        [🔗](#updatehistorynewfast)        |
 | ``                         | `updateTime`                         |     [ ]     |             [🔗](#updatetime)             |
+| ``                         | `updateAchievements`                 |     [ ]     |         [🔗](#updateachievements)         |
+| ``                         | `tradingReward`                      |     [ ]     |           [🔗](#tradingreward)            |
+| ``                         | `successpending/created`             |     [ ]     |       [🔗](#successpending-created)       |
+| ``                         | `failpending/created`                |     [ ]     |        [🔗](#failpending-created)         |
+| ``                         | `10NUMBER_DEALS_WITH_PROFIT`         |     [ ]     |     [🔗](#10number_deals_with_profit)     |
+
+# Order / deals events
+| Client name                | Event name                           | Implemented |                   Blink                   |
+| -------------------------- | ------------------------------------ | :---------: | :---------------------------------------: |
 | `update_opened_deals`      | `updateOpenedDeals`                  |     [x]     |         [🔗](#updateopeneddeals)          |
-| ``                         | `updateClosedDeals`                  |     [ ]     |         [🔗](#updatecloseddeals)          |
 | `success_open_deal`        | `successopenOrder`                   |     [x]     |          [🔗](#successopenorder)          |
 | ``                         | `failopenOrder`                      |     [ ]     |           [🔗](#failopenorder)            |
-| ``                         | `successcloseOrder`                  |     [ ]     |         [🔗](#successcloseorder)          |
 | ``                         | `successcopyOrder`                   |     [ ]     |          [🔗](#successcopyorder)          |
 | ``                         | `failcopyOrder`                      |     [ ]     |           [🔗](#failcopyorder)            |
 | ``                         | `successopenExpress`                 |     [ ]     |         [🔗](#successopenexpress)         |
 | ``                         | `failopenExpress`                    |     [ ]     |          [🔗](#failopenexpress)           |
+| ``                         | `openSocialDeal`                     |     [ ]     |           [🔗](#opensocialdeal)           |
+| ``                         | `updateClosedSocialDeals`            |     [ ]     |      [🔗](#updateclosedsocialdeals)       |
+| ``                         | `updateOpenedSocialDeals`            |     [ ]     |      [🔗](#updateopenedsocialdeals)       |
+| `update_closed_deals`      | `updateClosedDeals`                  |     [x]     |         [🔗](#updatecloseddeals)          |
+| ``                         | `successopenFreeTrade`               |     [ ]     |        [🔗](#successopenfreetrade)        |
+| ``                         | `failopenFreeTrade`                  |     [ ]     |         [🔗](#failopenfreetrade)          |
+| ``                         | `failcancelOrder`                    |     [ ]     |          [🔗](#failcancelorder)           |
+| ``                         | `successcancelOrder`                 |     [ ]     |         [🔗](#successcancelorder)         |
 | ``                         | `successcloseExpress`                |     [ ]     |        [🔗](#successcloseexpress)         |
+| ``                         | `successcloseExpressDeals`           |     [ ]     |      [🔗](#successcloseexpressdeals)      |
 | ``                         | `successupdateOpenedExpresses`       |     [ ]     |    [🔗](#successupdateopenedexpresses)    |
 | ``                         | `successupdateClosedExpresses`       |     [ ]     |    [🔗](#successupdateclosedexpresses)    |
 | ``                         | `successupdateExpress`               |     [ ]     |        [🔗](#successupdateexpress)        |
-| ``                         | `successindicator/create`            |     [ ]     |      [🔗](#successindicator-create)       |
-| ``                         | `failindicator/create`               |     [ ]     |        [🔗](#failindicator-create)        |
-| ``                         | `successindicator/load`              |     [ ]     |       [🔗](#successindicator-load)        |
-| ``                         | `successindicator/delete`            |     [ ]     |      [🔗](#successindicator-delete)       |
-| ``                         | `successindicator/deleteAll`         |     [ ]     |     [🔗](#successindicator-deleteall)     |
+| `success_close_deal`       | `successcloseOrder`                  |     [x]     |         [🔗](#successcloseorder)          |
+| ``                         | `successopenPendingOrder`            |     [ ]     |      [🔗](#successopenpendingorder)       |
+| ``                         | `failopenPendingOrder`               |     [ ]     |        [🔗](#failopenpendingorder)        |
+| ``                         | `successupdatePending`               |     [ ]     |        [🔗](#successupdatepending)        |
+| ``                         | `successcancelPendingOrder`          |     [ ]     |     [🔗](#successcancelpendingorder)      |
+| ``                         | `failcancelPendingOrder`             |     [ ]     |       [🔗](#failcancelpendingorder)       |
+| ``                         | `successsocial/opened-deal-info`     |     [ ]     |   [🔗](#successsocial-opened-deal-info)   |
+| ``                         | `successsocial/closed-deal-info`     |     [ ]     |   [🔗](#successsocial-closed-deal-info)   |
+| ``                         | `successcopySignalOrder`             |     [ ]     |       [🔗](#successcopysignalorder)       |
+| ``                         | `successdeals/rollover`              |     [ ]     |       [🔗](#successdeals-rollover)        |
+| ``                         | `faildeals/rollover`                 |     [ ]     |         [🔗](#faildeals-rollover)         |
+
+# Assets events
+| Client name                | Event name                           | Implemented |                   Blink                   |
+| -------------------------- | ------------------------------------ | :---------: | :---------------------------------------: |
+| `update_assets`            | `updateAssets`                       |     [x]     |            [🔗](#updateassets)            |
+| `update_close_value`       | `updateStream`                       |     [x]     |            [🔗](#updatestream)            |
+| ``                         | `updateHistoryNew`                   |     [ ]     |          [🔗](#updatehistorynew)          |
+| `update_history_new_fast`  | `updateHistoryNewFast`               |     [x]     |        [🔗](#updatehistorynewfast)        |
+| `change_market_sentiment`  | `chafor`                             |     [x]     |               [🔗](#chafor)               |
+| ``                         | `loadHistoryPeriod`                  |     [ ]     |         [🔗](#loadhistoryperiod)          |
+| `load_history_period_fast` | `loadHistoryPeriodFast`              |     [x]     |       [🔗](#loadhistoryperiodfast)        |
+
+# UI events
+| Client name                | Event name                           | Implemented |                   Blink                   |
+| -------------------------- | ------------------------------------ | :---------: | :---------------------------------------: |
 | ``                         | `successdrawing/create`              |     [ ]     |       [🔗](#successdrawing-create)        |
 | ``                         | `faildrawing/create`                 |     [ ]     |         [🔗](#faildrawing-create)         |
 | ``                         | `successdrawing/load`                |     [ ]     |        [🔗](#successdrawing-load)         |
 | ``                         | `successdeleteDrawing`               |     [ ]     |        [🔗](#successdeletedrawing)        |
-| ``                         | `updateOpenedSocialDeals`            |     [ ]     |      [🔗](#updateopenedsocialdeals)       |
-| ``                         | `updateClosedSocialDeals`            |     [ ]     |      [🔗](#updateclosedsocialdeals)       |
-| ``                         | `openSocialDeal`                     |     [ ]     |           [🔗](#opensocialdeal)           |
-| ``                         | `signals/load`                       |     [ ]     |            [🔗](#signals-load)            |
-| ``                         | `signals/update`                     |     [ ]     |           [🔗](#signals-update)           |
-| ``                         | `successsignals/stats`               |     [ ]     |        [🔗](#successsignals-stats)        |
+| ``                         | `updateCharts`                       |     [ ]     |            [🔗](#updatecharts)            |
+| ``                         | `successdeleteDrawing`               |     [ ]     |        [🔗](#successdeletedrawing)        |
+| ``                         | `successdrawing/create`              |     [ ]     |       [🔗](#successdrawing-create)        |
+| ``                         | `faildrawing/create`                 |     [ ]     |         [🔗](#faildrawing-create)         |
+| ``                         | `successdrawing/load`                |     [ ]     |        [🔗](#successdrawing-load)         |
+| ``                         | `successorder-chart/load`            |     [ ]     |      [🔗](#successorder-chart-load)       |
+| ``                         | `successfavorite/load`               |     [ ]     |        [🔗](#successfavorite-load)        |
+| ``                         | `successfavorite/change`             |     [ ]     |       [🔗](#successfavorite-change)       |
+| ``                         | `successprice-alert/load`            |     [ ]     |      [🔗](#successprice-alert-load)       |
+| ``                         | `successprice-alert/add`             |     [ ]     |       [🔗](#successprice-alert-add)       |
+| ``                         | `failprice-alert/add`                |     [ ]     |        [🔗](#failprice-alert-add)         |
+| ``                         | `successprice-alert/remove`          |     [ ]     |     [🔗](#successprice-alert-remove)      |
+
+
+# AI events
+| Client name                | Event name                           | Implemented |                   Blink                   |
+| -------------------------- | ------------------------------------ | :---------: | :---------------------------------------: |
 | ``                         | `successai-strategy-multi/start`     |     [ ]     |   [🔗](#successai-strategy-multi-start)   |
 | ``                         | `failai-strategy-multi/start`        |     [ ]     |    [🔗](#failai-strategy-multi-start)     |
 | ``                         | `successai-strategy-multi/stop`      |     [ ]     |   [🔗](#successai-strategy-multi-stop)    |
@@ -45,63 +91,6 @@
 | ``                         | `successai-strategy-multi/get-state` |     [ ]     | [🔗](#successai-strategy-multi-get-state) |
 | ``                         | `failai-strategy-multi/get-state`    |     [ ]     |  [🔗](#failai-strategy-multi-get-state)   |
 | ``                         | `ai-strategy-multi/update`           |     [ ]     |      [🔗](#ai-strategy-multi-update)      |
-| `change_market_sentiment`  | `chafor`                             |     [x]     |               [🔗](#chafor)               |
-| ``                         | `failopenOrder`                      |     [ ]     |           [🔗](#failopenorder)            |
-| ``                         | `updateClosedSocialDeals`            |     [ ]     |      [🔗](#updateclosedsocialdeals)       |
-| ``                         | `updateOpenedSocialDeals`            |     [ ]     |      [🔗](#updateopenedsocialdeals)       |
-| ``                         | `updateAchievements`                 |     [ ]     |         [🔗](#updateachievements)         |
-| `update_closed_deals`      | `updateClosedDeals`                  |     [x]     |         [🔗](#updatecloseddeals)          |
-| ``                         | `successopenOrder`                   |     [ ]     |          [🔗](#successopenorder)          |
-| ``                         | `successopenFreeTrade`               |     [ ]     |        [🔗](#successopenfreetrade)        |
-| ``                         | `failopenFreeTrade`                  |     [ ]     |         [🔗](#failopenfreetrade)          |
-| ``                         | `successpending/created`             |     [ ]     |       [🔗](#successpending-created)       |
-| ``                         | `failpending/created`                |     [ ]     |        [🔗](#failpending-created)         |
-| ``                         | `10NUMBER_DEALS_WITH_PROFIT`         |     [ ]     |     [🔗](#10number_deals_with_profit)     |
-| ``                         | `successcopyOrder`                   |     [ ]     |          [🔗](#successcopyorder)          |
-| ``                         | `failcopyOrder`                      |     [ ]     |           [🔗](#failcopyorder)            |
-| ``                         | `failcancelOrder`                    |     [ ]     |          [🔗](#failcancelorder)           |
-| ``                         | `successcancelOrder`                 |     [ ]     |         [🔗](#successcancelorder)         |
-| ``                         | `loadHistoryPeriod`                  |     [ ]     |         [🔗](#loadhistoryperiod)          |
-| `load_history_period_fast` | `loadHistoryPeriodFast`              |     [x]     |       [🔗](#loadhistoryperiodfast)        |
-| ``                         | `updateCharts`                       |     [ ]     |            [🔗](#updatecharts)            |
-| ``                         | `successopenExpress`                 |     [ ]     |         [🔗](#successopenexpress)         |
-| ``                         | `failopenExpress`                    |     [ ]     |          [🔗](#failopenexpress)           |
-| ``                         | `successcloseExpress`                |     [ ]     |        [🔗](#successcloseexpress)         |
-| ``                         | `successcloseExpressDeals`           |     [ ]     |      [🔗](#successcloseexpressdeals)      |
-| ``                         | `successupdateOpenedExpresses`       |     [ ]     |    [🔗](#successupdateopenedexpresses)    |
-| ``                         | `successupdateClosedExpresses`       |     [ ]     |    [🔗](#successupdateclosedexpresses)    |
-| ``                         | `successupdateExpress`               |     [ ]     |        [🔗](#successupdateexpress)        |
-| ``                         | `successdeleteDrawing`               |     [ ]     |        [🔗](#successdeletedrawing)        |
-| ``                         | `successdrawing/create`              |     [ ]     |       [🔗](#successdrawing-create)        |
-| ``                         | `faildrawing/create`                 |     [ ]     |         [🔗](#faildrawing-create)         |
-| ``                         | `successdrawing/load`                |     [ ]     |        [🔗](#successdrawing-load)         |
-| `success_close_deal`       | `successcloseOrder`                  |     [x]     |         [🔗](#successcloseorder)          |
-| ``                         | `successindicator/create`            |     [ ]     |      [🔗](#successindicator-create)       |
-| ``                         | `failindicator/create`               |     [ ]     |        [🔗](#failindicator-create)        |
-| ``                         | `successindicator/load`              |     [ ]     |       [🔗](#successindicator-load)        |
-| ``                         | `successindicator/deleteAll`         |     [ ]     |     [🔗](#successindicator-deleteall)     |
-| ``                         | `successindicator/delete`            |     [ ]     |      [🔗](#successindicator-delete)       |
-| ``                         | `successopenPendingOrder`            |     [ ]     |      [🔗](#successopenpendingorder)       |
-| ``                         | `failopenPendingOrder`               |     [ ]     |        [🔗](#failopenpendingorder)        |
-| ``                         | `successupdatePending`               |     [ ]     |        [🔗](#successupdatepending)        |
-| ``                         | `successcancelPendingOrder`          |     [ ]     |     [🔗](#successcancelpendingorder)      |
-| ``                         | `failcancelPendingOrder`             |     [ ]     |       [🔗](#failcancelpendingorder)       |
-| ``                         | `successorder-chart/load`            |     [ ]     |      [🔗](#successorder-chart-load)       |
-| ``                         | `successsocial/opened-deal-info`     |     [ ]     |   [🔗](#successsocial-opened-deal-info)   |
-| ``                         | `successsocial/closed-deal-info`     |     [ ]     |   [🔗](#successsocial-closed-deal-info)   |
-| ``                         | `signals/load`                       |     [ ]     |            [🔗](#signals-load)            |
-| ``                         | `signals/update`                     |     [ ]     |           [🔗](#signals-update)           |
-| ``                         | `successsignals/stats`               |     [ ]     |        [🔗](#successsignals-stats)        |
-| ``                         | `successcopySignalOrder`             |     [ ]     |       [🔗](#successcopysignalorder)       |
-| ``                         | `successdeals/rollover`              |     [ ]     |       [🔗](#successdeals-rollover)        |
-| ``                         | `faildeals/rollover`                 |     [ ]     |         [🔗](#faildeals-rollover)         |
-| ``                         | `successfavorite/load`               |     [ ]     |        [🔗](#successfavorite-load)        |
-| ``                         | `successfavorite/change`             |     [ ]     |       [🔗](#successfavorite-change)       |
-| ``                         | `successprice-alert/load`            |     [ ]     |      [🔗](#successprice-alert-load)       |
-| ``                         | `successprice-alert/add`             |     [ ]     |       [🔗](#successprice-alert-add)       |
-| ``                         | `failprice-alert/add`                |     [ ]     |        [🔗](#failprice-alert-add)         |
-| ``                         | `successprice-alert/remove`          |     [ ]     |     [🔗](#successprice-alert-remove)      |
-| ``                         | `tradingReward`                      |     [ ]     |           [🔗](#tradingreward)            |
 | ``                         | `successai-strategy-multi/start`     |     [ ]     |   [🔗](#successai-strategy-multi-start)   |
 | ``                         | `failai-strategy-multi/start`        |     [ ]     |    [🔗](#failai-strategy-multi-start)     |
 | ``                         | `successai-strategy-multi/stop`      |     [ ]     |   [🔗](#successai-strategy-multi-stop)    |
@@ -109,6 +98,33 @@
 | ``                         | `successai-strategy-multi/get-state` |     [ ]     | [🔗](#successai-strategy-multi-get-state) |
 | ``                         | `failai-strategy-multi/get-state`    |     [ ]     |  [🔗](#failai-strategy-multi-get-state)   |
 | ``                         | `ai-strategy-multi/update"`          |     [ ]     |     [🔗](#ai-strategy-multi-update")      |
+
+# Indicator events
+| Client name                | Event name                           | Implemented |                   Blink                   |
+| -------------------------- | ------------------------------------ | :---------: | :---------------------------------------: |
+| ``                         | `successindicator/create`            |     [ ]     |      [🔗](#successindicator-create)       |
+| ``                         | `failindicator/create`               |     [ ]     |        [🔗](#failindicator-create)        |
+| ``                         | `successindicator/load`              |     [ ]     |       [🔗](#successindicator-load)        |
+| ``                         | `successindicator/delete`            |     [ ]     |      [🔗](#successindicator-delete)       |
+| ``                         | `successindicator/deleteAll`         |     [ ]     |     [🔗](#successindicator-deleteall)     |
+| ``                         | `successindicator/create`            |     [ ]     |      [🔗](#successindicator-create)       |
+| ``                         | `failindicator/create`               |     [ ]     |        [🔗](#failindicator-create)        |
+| ``                         | `successindicator/load`              |     [ ]     |       [🔗](#successindicator-load)        |
+| ``                         | `successindicator/deleteAll`         |     [ ]     |     [🔗](#successindicator-deleteall)     |
+| ``                         | `successindicator/delete`            |     [ ]     |      [🔗](#successindicator-delete)       |
+
+
+## Signals events
+
+| Client name                | Event name                           | Implemented |                   Blink                   |
+| -------------------------- | ------------------------------------ | :---------: | :---------------------------------------: |
+| ``                         | `signals/load`                       |     [ ]     |            [🔗](#signals-load)            |
+| ``                         | `signals/update`                     |     [ ]     |           [🔗](#signals-update)           |
+| ``                         | `successsignals/stats`               |     [ ]     |        [🔗](#successsignals-stats)        |
+| ``                         | `signals/load`                       |     [ ]     |            [🔗](#signals-load)            |
+| ``                         | `signals/update`                     |     [ ]     |           [🔗](#signals-update)           |
+| ``                         | `successsignals/stats`               |     [ ]     |        [🔗](#successsignals-stats)        |
+
 
 # Connection
 

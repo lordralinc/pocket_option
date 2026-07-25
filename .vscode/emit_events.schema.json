@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Emit Events Schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["name", "event"],
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Python method name"
+      },
+      "doc": {
+        "type": ["string", "null"],
+        "description": "Event documentation"
+      },
+      "event": {
+        "type": "string",
+        "description": "Protocol event name"
+      },
+      "category": {
+        "type": ["string", "null"],
+        "description": "Event category",
+        "enum": [
+          "common",
+          "deals",
+          "assets",
+          "ui",
+          "ai",
+          "indicator",
+          "signals",
+          null
+        ]
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Argument name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Argument type"
+          },
+          "doc": {
+            "type": "string",
+            "description": "Argument documentation"
+          }
+        },
+        "required": ["name", "type"]
+      }
+    }
+  }
+}

@@ -22,5 +22,9 @@
     "tests"
   ],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "yaml.schemas": {
+    "./.vscode/emit_events.schema.json": "generator/emit_events.yaml",
+    "./.vscode/on_events.schema.json": "generator/on_events.yaml",
+  }
 }
