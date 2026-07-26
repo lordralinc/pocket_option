@@ -187,6 +187,81 @@ if __name__ == "__main__":
 
 ```
 
+## 📤 Доступные события для отправки
+
+<!-- START_AVAILABLE_EMIT_EVENTS -->
+
+| Method | Event |  Category  | Description |
+|--------|-------|:----------:|-------------|
+| `client.emit.ai_strategy_multi_get_state` | `ai-strategy-multi/get-state` | ai | Get AI strategy state. |
+| `client.emit.change_asset` | `changeSymbol` | assets | Changes the active trading asset and timeframe. |
+| `client.emit.subscribe_for_market_sentiment` | `subfor` | assets | Subscribes to market sentiment updates for an asset. |
+| `client.emit.subscribe_to_asset` | `subscribeSymbol` | assets | Subscribes to real-time updates for a trading asset. |
+| `client.emit.unsubscribe_for_market_sentiment` | `unsubfor` | assets | Removes market sentiment subscription for an asset. |
+| `client.emit.unsubscribe_from_asset` | `unSubscribeSymbol` | assets | Unsubscribes from real-time updates for a trading asset. |
+| `client.emit.auth` | `auth` | common | Authorizes the client session. |
+| `client.emit.demo_refill_balance` | `td/refill` | common | Refill demo account balance. |
+| `client.emit.load_history_period` | `loadHistoryPeriod` | common | Requests historical market data for a specific period. |
+| `client.emit.ps` | `ps` | common | Sends a heartbeat request to keep the connection alive. |
+| `client.emit.update_balance` | `updateBalance` | common | Request balance update. |
+| `client.emit.copy_signal` | `copySignalOrder` | deals | Creates a deal from a copy trading signal. |
+| `client.emit.deals_ai` | `deals/ai` | deals | AI deal operation. |
+| `client.emit.deals_copy` | `copyorder` | deals | Copy existing order |
+| `client.emit.deals_double_up` | `deals/double-up` | deals | Double existing deal. |
+| `client.emit.deals_open` | `openOrder` | deals | Creates a new trading deal. |
+| `client.emit.deals_pending_cancel` | `cancelPendingOrder` | deals | Cancel pending order. |
+| `client.emit.deals_pending_open` | `openPendingOrder` | deals | Create pending order. |
+| `client.emit.deals_rollover` | `deals/rollover` | deals | Rollover existing deal. |
+| `client.emit.deals_update_opened` | `updateOpenedDeals` | deals | - |
+| `client.emit.social_disable_only_watched` | `social/disable-only-watched` | deals | Disable watched filter. |
+| `client.emit.social_enable_only_watched` | `social/enable-only-watched` | deals | Enable watched filter. |
+| `client.emit.update_closed_expresses` | `updateClosedExpresses` | deals | - |
+| `client.emit.indicator_load` | `indicator/load` | indicator | Indicates that indicator data has been loaded by the platform. |
+| `client.emit.signals_subscribe` | `signals/subscribe` | signals | - |
+| `client.emit.signals_unsubscribe` | `signals/unsubscribe` | signals | - |
+| `client.emit.favorite_load` | `favorite/load` | ui | Indicates that favorite has been loaded by the platform. |
+| `client.emit.price_alert_load` | `price-alert/load` | ui | Indicates that price alert data has been loaded by the platform. |
+
+<!-- END_AVAILABLE_EMIT_EVENTS -->
+
+
+## 📥 Доступные события для получения
+
+<!-- START_AVAILABLE_ON_EVENTS -->
+
+| Method | Event |  Category  | Description |
+|--------|-------|:----------:|-------------|
+| `client.on.ai_strategy_multi_get_state` | `ai-strategy-multi/get-state` | ai | Get AI strategy state. |
+| `client.on.change_asset` | `changeSymbol` | assets | Changes the active trading asset and timeframe. |
+| `client.on.subscribe_for_market_sentiment` | `subfor` | assets | Subscribes to market sentiment updates for an asset. |
+| `client.on.subscribe_to_asset` | `subscribeSymbol` | assets | Subscribes to real-time updates for a trading asset. |
+| `client.on.unsubscribe_for_market_sentiment` | `unsubfor` | assets | Removes market sentiment subscription for an asset. |
+| `client.on.unsubscribe_from_asset` | `unSubscribeSymbol` | assets | Unsubscribes from real-time updates for a trading asset. |
+| `client.on.auth` | `auth` | common | Authorizes the client session. |
+| `client.on.demo_refill_balance` | `td/refill` | common | Refill demo account balance. |
+| `client.on.load_history_period` | `loadHistoryPeriod` | common | Requests historical market data for a specific period. |
+| `client.on.ps` | `ps` | common | Sends a heartbeat request to keep the connection alive. |
+| `client.on.update_balance` | `updateBalance` | common | Request balance update. |
+| `client.on.copy_signal` | `copySignalOrder` | deals | Creates a deal from a copy trading signal. |
+| `client.on.deals_ai` | `deals/ai` | deals | AI deal operation. |
+| `client.on.deals_copy` | `copyorder` | deals | Copy existing order |
+| `client.on.deals_double_up` | `deals/double-up` | deals | Double existing deal. |
+| `client.on.deals_open` | `openOrder` | deals | Creates a new trading deal. |
+| `client.on.deals_pending_cancel` | `cancelPendingOrder` | deals | Cancel pending order. |
+| `client.on.deals_pending_open` | `openPendingOrder` | deals | Create pending order. |
+| `client.on.deals_rollover` | `deals/rollover` | deals | Rollover existing deal. |
+| `client.on.deals_update_opened` | `updateOpenedDeals` | deals | - |
+| `client.on.social_disable_only_watched` | `social/disable-only-watched` | deals | Disable watched filter. |
+| `client.on.social_enable_only_watched` | `social/enable-only-watched` | deals | Enable watched filter. |
+| `client.on.update_closed_expresses` | `updateClosedExpresses` | deals | - |
+| `client.on.indicator_load` | `indicator/load` | indicator | Indicates that indicator data has been loaded by the platform. |
+| `client.on.signals_subscribe` | `signals/subscribe` | signals | - |
+| `client.on.signals_unsubscribe` | `signals/unsubscribe` | signals | - |
+| `client.on.favorite_load` | `favorite/load` | ui | Indicates that favorite has been loaded by the platform. |
+| `client.on.price_alert_load` | `price-alert/load` | ui | Indicates that price alert data has been loaded by the platform. |
+
+<!-- END_AVAILABLE_ON_EVENTS -->
+
 ## 📜 Лицензия
 
 **MIT License** — делай что хочешь, но на свой страх и риск.

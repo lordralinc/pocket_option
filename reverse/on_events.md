@@ -13,6 +13,9 @@
 | ``                         | `successpending/created`             |     [ ]     |       [🔗](#successpending-created)       |
 | ``                         | `failpending/created`                |     [ ]     |        [🔗](#failpending-created)         |
 | ``                         | `10NUMBER_DEALS_WITH_PROFIT`         |     [ ]     |     [🔗](#10number_deals_with_profit)     |
+| ``                         | `loadHistoryPeriod`                  |     [ ]     |         [🔗](#loadhistoryperiod)          |
+| `load_history_period_fast` | `loadHistoryPeriodFast`              |     [x]     |       [🔗](#loadhistoryperiodfast)        |
+
 
 # Order / deals events
 | Client name                | Event name                           | Implemented |                   Blink                   |
@@ -57,8 +60,7 @@
 | ``                         | `updateHistoryNew`                   |     [ ]     |          [🔗](#updatehistorynew)          |
 | `update_history_new_fast`  | `updateHistoryNewFast`               |     [x]     |        [🔗](#updatehistorynewfast)        |
 | `change_market_sentiment`  | `chafor`                             |     [x]     |               [🔗](#chafor)               |
-| ``                         | `loadHistoryPeriod`                  |     [ ]     |         [🔗](#loadhistoryperiod)          |
-| `load_history_period_fast` | `loadHistoryPeriodFast`              |     [x]     |       [🔗](#loadhistoryperiodfast)        |
+
 
 # UI events
 | Client name                | Event name                           | Implemented |                   Blink                   |

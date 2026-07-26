@@ -12,9 +12,13 @@ __all__ = (
     "AuthorizationData",
     "ChangeAssetRequest",
     "Command",
+    "CopyOrderRequest",
+    "CopyOrderRequest",
     "CopySignalRequest",
     "Deal",
     "DealAction",
+    "DealsDoubleUpRequest",
+    "DealsRolloverRequest",
     "IsDemo",
     "MarketSentimentItem",
     "MarketSentimentItemListTypeAdapter",
@@ -31,6 +35,15 @@ __all__ = (
 )
 
 type IsDemo = typing.Literal[0, 1]
+
+
+class BaseModel(pydantic.BaseModel): ...
+
+
+class BaseRequest(BaseModel): ...
+
+
+class BaseEvent(BaseModel): ...
 
 
 class Asset(enum.StrEnum):
@@ -205,7 +218,7 @@ class Asset(enum.StrEnum):
         return core_schema.no_info_after_validator_function(cls, core_schema.str_schema())
 
 
-class AuthorizationData(pydantic.BaseModel):
+class AuthorizationData(BaseRequest):
     """
     PocketOption authorization payload.
 
@@ -233,11 +246,11 @@ class AuthorizationData(pydantic.BaseModel):
     ]
 
 
-class SuccessAuthEvent(pydantic.BaseModel):
+class SuccessAuthEvent(BaseEvent):
     id: str
 
 
-class SuccessUpdateBalanceEvent(pydantic.BaseModel):
+class SuccessUpdateBalanceEvent(BaseEvent):
     """
     Balance update event.
 
@@ -257,7 +270,7 @@ class SuccessUpdateBalanceEvent(pydantic.BaseModel):
     balance: float
 
 
-class UpdateHistoryFastEvent(pydantic.BaseModel):
+class UpdateHistoryFastEvent(BaseEvent):
     """
     Fast history update event.
 
@@ -289,7 +302,7 @@ class UpdateHistoryFastEvent(pydantic.BaseModel):
     history: list[list[float]]
 
 
-class UpdateCloseValueItem(pydantic.BaseModel):
+class UpdateCloseValueItem(BaseEvent):
     """
     Close value update item.
 
@@ -317,11 +330,11 @@ class OpenPendingDealRequestOpenType(enum.IntEnum):
 
 
 class Command(enum.IntEnum):
-    PUT = 0
-    CALL = 1
+    CALL = 0
+    PUT = 1
 
 
-class Deal(pydantic.BaseModel):
+class Deal(BaseEvent):
     """
     Trading deal model.
 
@@ -415,7 +428,7 @@ class DealAction(enum.StrEnum):
     PUT = "put"
 
 
-class OpenDealRequest(pydantic.BaseModel):
+class OpenDealRequest(BaseRequest):
     """
     Request model for opening a new trading deal.
 
@@ -455,7 +468,7 @@ class OpenDealRequest(pydantic.BaseModel):
     time: int
 
 
-class CopySignalRequest(pydantic.BaseModel):
+class CopySignalRequest(BaseRequest):
     """
     Request model for copy trading signal execution.
 
@@ -501,7 +514,7 @@ class CopySignalRequest(pydantic.BaseModel):
     signal_id: typing.Annotated[str, pydantic.Field(..., alias="signalId")]
 
 
-class OpenPendingDealRequest(pydantic.BaseModel):
+class OpenPendingDealRequest(BaseRequest):
     """
     Request model for creating a pending trading deal.
 
@@ -542,7 +555,7 @@ class OpenPendingDealRequest(pydantic.BaseModel):
     command: Command
 
 
-class ChangeAssetRequest(pydantic.BaseModel):
+class ChangeAssetRequest(BaseRequest):
     """
     Request model for changing active trading asset subscription.
 
@@ -554,7 +567,7 @@ class ChangeAssetRequest(pydantic.BaseModel):
     period: int
 
 
-class SuccessCloseDealEvent(pydantic.BaseModel):
+class SuccessCloseDealEvent(BaseEvent):
     profit: float
     deals: list[Deal]
 
@@ -573,7 +586,7 @@ class AssetType(enum.StrEnum):
     INDEX = "index"
 
 
-class AssetItemTimeframe(pydantic.BaseModel):
+class AssetItemTimeframe(BaseEvent):
     """
     Asset timeframe configuration.
 
@@ -584,7 +597,7 @@ class AssetItemTimeframe(pydantic.BaseModel):
     time: int
 
 
-class UpdateAssetItem(pydantic.BaseModel):
+class UpdateAssetItem(BaseEvent):
     """
     Model describing an asset update item received from the trading server.
 
@@ -648,7 +661,7 @@ class UpdateAssetItem(pydantic.BaseModel):
 UpdateAssetItemListTypeAdapter = pydantic.TypeAdapter(list[UpdateAssetItem])
 
 
-class MarketSentimentItem(pydantic.BaseModel):
+class MarketSentimentItem(BaseEvent):
     """
     Market sentiment data model.
 
@@ -666,7 +679,7 @@ class MarketSentimentItem(pydantic.BaseModel):
 MarketSentimentItemListTypeAdapter = pydantic.TypeAdapter(list[MarketSentimentItem])
 
 
-class LoadHistoryPeriodRequest(pydantic.BaseModel):
+class LoadHistoryPeriodRequest(BaseRequest):
     """
     Request historical candlestick data for a specific time range.
 
@@ -684,7 +697,7 @@ class LoadHistoryPeriodRequest(pydantic.BaseModel):
     period: int
 
 
-class LoadHistoryPeriodItem(pydantic.BaseModel):
+class LoadHistoryPeriodItem(BaseEvent):
     """
     Historical candlestick (OHLCV) data.
 
@@ -706,7 +719,7 @@ class LoadHistoryPeriodItem(pydantic.BaseModel):
     volume: int
 
 
-class LoadHistoryPeriodFastResponse(pydantic.BaseModel):
+class LoadHistoryPeriodFastResponse(BaseEvent):
     """
     Response containing historical candlestick data.
 
@@ -720,3 +733,32 @@ class LoadHistoryPeriodFastResponse(pydantic.BaseModel):
     index: int | None
     period: int
     data: list[LoadHistoryPeriodItem]
+
+
+class CopyOrderRequest(BaseRequest):
+    """
+    Request to copy an existing order.
+
+    :ivar ticket:    Deal ID to copy.
+    """
+
+    ticket: typing.Annotated[uuid.UUID, pydantic.Field(alias="copyTicket")]
+
+
+class DealsDoubleUpRequest(BaseRequest):
+    """
+    Request to double up an existing order.
+
+    :ivar ticket:    Deal ID to double up.
+    """
+
+    ticket: uuid.UUID
+
+
+class DealsRolloverRequest(BaseRequest):
+    ticket: uuid.UUID
+    amount: float
+
+
+class CancelPendingDealRequest(BaseRequest):
+    ticket: uuid.UUID

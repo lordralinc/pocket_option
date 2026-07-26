@@ -1,6 +1,27 @@
 default_stages: [pre-commit]
 
 repos:
+  - repo: local
+    hooks:
+      - id: sort_event
+        name: Sort events on generator
+        entry: poetry run python scripts/sort_events.py
+        language: system
+        pass_filenames: false
+
+      - id: generate
+        name: Generate files
+        entry: poetry run python generator/generate.py
+        language: system
+        pass_filenames: false
+
+      - id: update_emit_readme
+        name: Generate emit table on readme
+        entry: poetry run python scripts/make_readme.py
+        language: system
+        pass_filenames: false
+
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:

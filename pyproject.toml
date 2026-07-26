@@ -1,6 +1,6 @@
 [project]
 name = "pocket-option"
-version = "0.2.9"
+version = "0.3.0"
 description = "Async API client for Pocket Option platform"
 authors = [{ name = "Yury \"lordralinc\" Yushmanov" }]
 license = "MIT"
@@ -39,6 +39,7 @@ keywords = [
 Homepage = "https://github.com/lordralinc/pocket_option"
 Repository = "https://github.com/lordralinc/pocket_option"
 Issues = "https://github.com/lordralinc/pocket_option/issues"
+Changelog = "https://github.com/lordralinc/pocket_option/releases"
 
 [project.optional-dependencies]
 ujson = ["ujson (>=5.11.0,<6.0.0)"]
@@ -137,6 +138,7 @@ lint.fixable = ["I", "RUF022", "UP035"]
     "D",
 ]
 "pocket_option/generated_client.py" = ["ERA001"]
+"scripts/**/*.py" = ["ALL"]
 
 [tool.ruff.format]
 quote-style = "double"

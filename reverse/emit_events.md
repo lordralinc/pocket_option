@@ -12,12 +12,12 @@
 
 | Client name                   | Event name                    | Implemented |               Blink                |
 | ----------------------------- | ----------------------------- | :---------: | :--------------------------------: |
-| `open_deal`                   | `openOrder`                   |     [x]     |          [🔗](#openorder)          |
-| ``                            | `copyOrder`                   |     [ ]     |          [🔗](#copyorder)          |
+| `deals_open`                  | `openOrder`                   |     [x]     |          [🔗](#openorder)          |
+| `deals_copy`                  | `copyOrder`                   |     [x]     |          [🔗](#copyorder)          |
 | ``                            | `openFreeTrade`               |     [ ]     |        [🔗](#openfreetrade)        |
 | `copy_signal`                 | `copySignalOrder`             |     [x]     |       [🔗](#copysignalorder)       |
-| ``                            | `deals/double-up`             |     [ ]     |       [🔗](#deals-double-up)       |
-| ``                            | `deals/rollover`              |     [ ]     |       [🔗](#deals-rollover)        |
+| `deals_double_up`             | `deals/double-up`             |     [x]     |       [🔗](#deals-double-up)       |
+| `deals_rollover`              | `deals/rollover`              |     [x]     |       [🔗](#deals-rollover)        |
 | `deals_ai`                    | `deals/ai`                    |     [x]     |          [🔗](#deals-ai)           |
 | `update_opened_deals`         | `updateOpenedDeals`           |     [x]     |      [🔗](#updateopeneddeals)      |
 | ``                            | `social/opened-deal-info`     |     [ ]     |   [🔗](#social-opened-deal-info)   |
@@ -35,7 +35,7 @@
 | ---------------------------------- | ------------------- | :---------: | :----------------------: |
 | `change_asset`                     | `changeSymbol`      |     [x]     |   [🔗](#changesymbol)    |
 | `subscribe_to_asset`               | `subscribeSymbol`   |     [x]     |  [🔗](#subscribesymbol)  |
-| ``                                 | `unSubscribeSymbol` |     [ ]     | [🔗](#unsubscribesymbol) |
+| `unsubscribe_from_asset`           | `unSubscribeSymbol` |     [x]     | [🔗](#unsubscribesymbol) |
 | `subscribe_for_market_sentiment`   | `subfor`            |     [x]     |      [🔗](#subfor)       |
 | `unsubscribe_for_market_sentiment` | `unsubfor`          |     [x]     |     [🔗](#unsubfor)      |
 
@@ -193,6 +193,10 @@ Copy signal order.
   "timeframe": "number",
   "signalId": "number"
 }
+```
+
+```JS
+42["copySignalOrder",{"symbol":"EURUSD_otc","amount":10,"expiredAt":10780,"action":"put","isDemo":1,"requestId":1784987386,"createdAt":1784987280,"timeframe":10800,"signalId":"1784998080-EURUSD_otc-10800"}]
 ```
 
 ---
@@ -682,10 +686,18 @@ Create pending order.
 
 ### Payload
 
-```js
-unknown;
-```
 
+```jsonl
+// ко времени
+["openPendingOrder",{"openType":0,"amount":10,"asset":"EURUSD_otc","openTime":"2026-07-26 15:28:07","openPrice":0,"timeframe":60,"minPayout":60,"command":0}]
+
+["openPendingOrder",{"openType":0,"amount":10,"asset":"EURUSD_otc","openTime":"2026-07-26 15:28:07","openPrice":0,"timeframe":60,"minPayout":60,"command":1}]
+
+// по цене
+["openPendingOrder",{"openType":1,"amount":10,"asset":"EURUSD_otc","openTime":"2026-07-26 15:28:07","openPrice":1.13183,"timeframe":60,"minPayout":60,"command":0}]
+
+["openPendingOrder",{"openType":1,"amount":10,"asset":"EURUSD_otc","openTime":"2026-07-26 15:28:07","openPrice":1.13183,"timeframe":60,"minPayout":60,"command":1}]
+```
 ---
 
 <h2 id="cancelpendingorder"><code>cancelPendingOrder</code></h2>
@@ -694,9 +706,7 @@ Cancel pending order.
 ### Payload
 
 ```json
-{
-  "ticket": "string"
-}
+42["cancelPendingOrder",{"ticket":"8924b0f1-83a0-4050-937c-e8483af4f3f7"}]
 ```
 
 ---
@@ -743,7 +753,101 @@ Refill demo balance.
 ### Payload
 
 ```js
-unknown;
+{
+	"data": [
+		"signals/stats",
+		[
+			[
+				1784986200,
+				[
+					[
+						"EURUSD_otc",
+						180
+					]
+				]
+			],
+			[
+				1784986560,
+				[
+					[
+						"EURUSD_otc",
+						120
+					]
+				]
+			],
+			[
+				1784986920,
+				[
+					[
+						"EURUSD_otc",
+						60
+					]
+				]
+			],
+			[
+				1784987100,
+				[
+					[
+						"EURUSD_otc",
+						15
+					],
+					[
+						"EURUSD_otc",
+						30
+					],
+					[
+						"EURUSD_otc",
+						45
+					],
+					[
+						"EURUSD_otc",
+						240
+					]
+				]
+			],
+			[
+				1784987145,
+				[
+					[
+						"EURUSD_otc",
+						3
+					],
+					[
+						"EURUSD_otc",
+						5
+					]
+				]
+			],
+			[
+				1784987150,
+				[
+					[
+						"EURUSD_otc",
+						1
+					]
+				]
+			],
+			[
+				1784987155,
+				[
+					[
+						"EURUSD_otc",
+						2
+					]
+				]
+			],
+			[
+				1784987160,
+				[
+					[
+						"EURUSD_otc",
+						10
+					]
+				]
+			]
+		]
+	]
+}
 ```
 
 <h2 id="updateclosedexpresses"><code>updateClosedExpresses</code></h2>

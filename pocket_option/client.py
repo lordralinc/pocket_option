@@ -59,6 +59,7 @@ class BasePocketOptionClient:
         reconnection_delay_max: float = 5.0,
         randomization_factor: float = 0.5,
         logger: bool | logging.Logger = False,
+        filter_events_log: list[str] | None = None,
         socketio_logger: bool | logging.Logger = False,
         engineio_logger: bool | logging.Logger = False,
         json: JsonFunction | None = None,
@@ -186,6 +187,7 @@ class BasePocketOptionClient:
         self._candle_storage: CandleStorage | None = None
         self._deals_storage: DealsStorage | None = None
         self._assets_storage: AssetsStorage | None = None
+        self.filter_events_log = filter_events_log or ["updateStream"]
 
     @property
     def candles(self) -> CandleStorage:
@@ -383,7 +385,8 @@ class BasePocketOptionClient:
 
     async def _handle_event(self, event_name: str, data: bytes | None = None) -> JsonValue | None:
         results = []
-        self.logger.debug("New event '%s' with data %r", event_name, data)
+        if event_name not in self.filter_events_log:
+            self.logger.debug("New event '%s' with data %r", event_name, data)
         for handler in filter(lambda x: x["name"] == event_name, self.handlers):
             try:
                 result = await handler["callback"](data)
@@ -395,11 +398,12 @@ class BasePocketOptionClient:
                     get_function_full_name(handler["callback"]),
                 )
             else:
-                self.logger.debug(
-                    "Handled by '%s' with result %r",
-                    get_function_full_name(handler["callback"]),
-                    result,
-                )
+                if event_name not in self.filter_events_log:
+                    self.logger.debug(
+                        "Handled by '%s' with result %r",
+                        get_function_full_name(handler["callback"]),
+                        result,
+                    )
 
         for result in results:
             if result is not None:

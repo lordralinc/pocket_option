@@ -23,7 +23,7 @@ class AssetsStorage(abc.ABC):
     def __init__(self, client: PocketOptionClient) -> None:
         self.client = client
 
-        self.client.on.update_assets(self._on_update_assets)
+        self.client.on.assets_update(self._on_update_assets)
 
         self.client.assets = self
 

@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import pathlib
 import subprocess
-import typing
 
 import jinja2
 import pydantic
@@ -53,23 +52,11 @@ env = jinja2.Environment(loader=jinja2.FileSystemLoader(pathlib.Path(__file__).p
 def generate():
     data = Data.model_validate(
         {
-            "on": sorted(
-                typing.cast(
-                    "list[dict]",
-                    yaml.safe_load(
-                        pathlib.Path(pathlib.Path(__file__).parent, "on_events.yaml").read_text(encoding="utf-8"),
-                    ),
-                ),
-                key=lambda x: (x.get("category", ""), x.get("name", "")),
+            "on": yaml.safe_load(
+                pathlib.Path(pathlib.Path(__file__).parent, "on_events.yaml").read_text(encoding="utf-8"),
             ),
-            "emit": sorted(
-                typing.cast(
-                    "list[dict]",
-                    yaml.safe_load(
-                        pathlib.Path(pathlib.Path(__file__).parent, "emit_events.yaml").read_text(encoding="utf-8"),
-                    ),
-                ),
-                key=lambda x: (x.get("category", ""), x.get("name", "")),
+            "emit": yaml.safe_load(
+                pathlib.Path(pathlib.Path(__file__).parent, "emit_events.yaml").read_text(encoding="utf-8"),
             ),
         },
     )

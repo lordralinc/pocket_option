@@ -1,91 +1,90 @@
----
-- name: update_balance
-  doc: Triggered when account balance information is updated.
-  event: successupdateBalance
-  category: common
-  return_type: models.SuccessUpdateBalanceEvent
-  pydantic_model: models.SuccessUpdateBalanceEvent
-
-- name: update_history_new_fast
-  doc: Triggered when fast historical market data is received.
-  event: updateHistoryNewFast
-  category: assets
-  return_type: models.UpdateHistoryFastEvent
-  pydantic_model: models.UpdateHistoryFastEvent
-
-- name: update_close_value
-  doc: Triggered when real-time price stream values are updated.
-  event: updateStream
-  category: assets
-  return_type: list[models.UpdateCloseValueItem]
-  pydantic_model: models.UpdateCloseValueListTypeAdapter
-
-- name: update_opened_deals
-  doc: Triggered when the list of opened deals is updated.
-  event: updateOpenedDeals
-  category: deals
-  return_type: list[models.Deal]
-  pydantic_model: models.DealListTypeAdapter
-
-- name: success_open_deal
-  doc: Triggered after a new deal is successfully opened.
-  event: successopenOrder
-  category: deals
-  return_type: models.Deal
-  pydantic_model: models.Deal
-
-- name: update_closed_deals
-  doc: Triggered when closed deals information is updated.
-  event: updateClosedDeals
-  category: deals
-  return_type: list[models.Deal]
-  pydantic_model: models.DealListTypeAdapter
-
-- name: update_assets
-  doc: Triggered when available trading assets metadata is updated.
+- name: assets_update
   event: updateAssets
   category: assets
-  return_type: list[models.UpdateAssetItem]
+  doc: Triggered when available trading assets metadata is updated.
   pydantic_model: models.UpdateAssetItemListTypeAdapter
-
-- name: success_close_deal
-  doc: Triggered after one or more deals are successfully closed.
-  event: successcloseOrder
-  category: deals
-  return_type: models.SuccessCloseDealEvent
-  pydantic_model: models.SuccessCloseDealEvent
-
-- name: connect
-  doc: Triggered when the Socket.IO connection is established.
-  event: connect
-  category: common
-  return_type: None
-  pydantic_model: None
-
-- name: disconnect
-  doc: Triggered when the Socket.IO connection is closed.
-  event: disconnect
-  category: common
-  return_type: None
-  pydantic_model: None
-
-- name: success_auth
-  doc: Triggered after successful account authorization.
-  event: successauth
-  category: common
-  return_type: models.SuccessAuthEvent
-  pydantic_model: models.SuccessAuthEvent
+  return_type: list[models.UpdateAssetItem]
 
 - name: change_market_sentiment
-  doc: Triggered when market sentiment data is updated.
   event: chafor
   category: assets
-  return_type: list[models.MarketSentimentItem]
+  doc: Triggered when market sentiment data is updated.
   pydantic_model: models.MarketSentimentItemListTypeAdapter
+  return_type: list[models.MarketSentimentItem]
+
+- name: update_close_value
+  event: updateStream
+  category: assets
+  doc: Triggered when real-time price stream values are updated.
+  pydantic_model: models.UpdateCloseValueListTypeAdapter
+  return_type: list[models.UpdateCloseValueItem]
+
+- name: update_history_new_fast
+  event: updateHistoryNewFast
+  category: assets
+  doc: Triggered when fast historical market data is received.
+  pydantic_model: models.UpdateHistoryFastEvent
+  return_type: models.UpdateHistoryFastEvent
+
+- name: balance_success_update
+  event: successupdateBalance
+  category: common
+  doc: Triggered when account balance information is updated.
+  pydantic_model: models.SuccessUpdateBalanceEvent
+  return_type: models.SuccessUpdateBalanceEvent
+
+- name: connect
+  event: connect
+  category: common
+  doc: Triggered when the Socket.IO connection is established.
+  pydantic_model: None
+  return_type: None
+
+- name: disconnect
+  event: disconnect
+  category: common
+  doc: Triggered when the Socket.IO connection is closed.
+  pydantic_model: None
+  return_type: None
 
 - name: load_history_period_fast
-  doc: Triggered when historical market data for a specific period is loaded.
   event: loadHistoryPeriodFast
-  category: assets
-  return_type: models.LoadHistoryPeriodFastResponse
+  category: common
+  doc: Triggered when historical market data for a specific period is loaded.
   pydantic_model: models.LoadHistoryPeriodFastResponse
+  return_type: models.LoadHistoryPeriodFastResponse
+
+- name: success_auth
+  event: successauth
+  category: common
+  doc: Triggered after successful account authorization.
+  pydantic_model: models.SuccessAuthEvent
+  return_type: models.SuccessAuthEvent
+
+- name: deals_success_close
+  event: successcloseOrder
+  category: deals
+  doc: Triggered after one or more deals are successfully closed.
+  pydantic_model: models.SuccessCloseDealEvent
+  return_type: models.SuccessCloseDealEvent
+
+- name: deals_success_open
+  event: successopenOrder
+  category: deals
+  doc: Triggered after a new deal is successfully opened.
+  pydantic_model: models.Deal
+  return_type: models.Deal
+
+- name: deals_update_closed
+  event: updateClosedDeals
+  category: deals
+  doc: Triggered when closed deals information is updated.
+  pydantic_model: models.DealListTypeAdapter
+  return_type: list[models.Deal]
+
+- name: deals_update_opened
+  event: updateOpenedDeals
+  category: deals
+  doc: Triggered when the list of opened deals is updated.
+  pydantic_model: models.DealListTypeAdapter
+  return_type: list[models.Deal]

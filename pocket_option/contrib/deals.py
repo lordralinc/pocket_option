@@ -78,10 +78,10 @@ class DealsStorage:
         self._open_deal_events: dict[int, asyncio.Event] = {}
         self._close_deal_events: dict[uuid.UUID, asyncio.Event] = {}
 
-        self.client.on.success_open_deal(self._on_success_open_deal)
-        self.client.on.success_close_deal(self._on_success_close_deal)
-        self.client.on.update_opened_deals(self.add_or_update_deal_bulk)
-        self.client.on.update_closed_deals(self.add_or_update_deal_bulk)
+        self.client.on.deals_success_open(self._on_success_open_deal)
+        self.client.on.deals_success_close(self._on_success_close_deal)
+        self.client.on.deals_update_opened(self.add_or_update_deal_bulk)
+        self.client.on.deals_update_closed(self.add_or_update_deal_bulk)
 
         self.client.deals = self
 
@@ -193,7 +193,7 @@ class DealsStorage:
 
         request_id = request_id or generate_request_id()
         self._open_deal_events[request_id] = asyncio.Event()
-        await self.client.emit.open_deal(
+        await self.client.emit.deals_open(
             OpenDealRequest(
                 asset=asset,
                 amount=amount,
