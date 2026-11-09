@@ -42,13 +42,13 @@ Issues = "https://github.com/lordralinc/pocket_option/issues"
 Changelog = "https://github.com/lordralinc/pocket_option/releases"
 
 [project.optional-dependencies]
-ujson = ["ujson (>=5.11.0,<6.0.0)"]
+ujson = ["ujson (>=5.11.0,<7.0.0)"]
 
 
 [dependency-groups]
 dev = [
     "black (>=25.9.0,<27.0.0)",
-    "isort (>=7.0.0,<9.0.0)",
+    "isort (>=7.0.0,<10.0.0)",
     "jinja2 (>=3.1.6,<4.0.0)",
     "pre-commit (>=4.3.0,<5.0.0)",
     "pytest (>=9.1.1,<10.0.0)",
